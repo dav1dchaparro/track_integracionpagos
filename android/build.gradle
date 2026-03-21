@@ -1,0 +1,24 @@
+// Top-level build file for the SmartReceipt Android project.
+// Configuration here applies to all sub-projects/modules.
+buildscript {
+    repositories {
+        google()        // Android-specific Gradle plugins
+        mavenCentral()  // Open-source libraries
+    }
+    dependencies {
+        // Android Gradle Plugin — handles APK/AAB compilation, resource merging, etc.
+        classpath 'com.android.tools.build:gradle:8.2.0'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+// Convenience task to wipe the build output directory
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

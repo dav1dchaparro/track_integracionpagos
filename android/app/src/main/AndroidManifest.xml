@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AndroidManifest.xml — SmartReceipt Android app manifest.
+  Declares the package name, required permissions, and the entry-point activity.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.smartreceipt.track">
+
+    <!-- Required to make HTTP calls to the SmartReceipt FastAPI backend -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:label="SmartReceipt"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+
+        <!--
+          Placeholder MainActivity — will host the UI once the Android UI layer
+          is implemented on top of the existing network layer.
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <!-- This activity is the app's launch entry point -->
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>

@@ -1,0 +1,3 @@
+// Declares the root project name and which sub-modules are included in the build.
+rootProject.name = "SmartReceipt"
+include ':app'

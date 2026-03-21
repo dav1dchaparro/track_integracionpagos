@@ -1,0 +1,56 @@
+// App-level build file for the SmartReceipt Android module.
+// Declares SDK versions, build types, and all runtime dependencies.
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    // The namespace doubles as the base Java package for generated R/BuildConfig classes
+    namespace 'com.smartreceipt.track'
+
+    compileSdk 34  // Build against Android 14 APIs
+
+    defaultConfig {
+        applicationId "com.smartreceipt.track"
+        minSdk     24  // Android 7.0 — covers ~95 % of active devices
+        targetSdk  34  // Declare full Android 14 compatibility
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            // Enable code shrinking and obfuscation for production builds
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    // Use Java 8 language features (lambdas, method references, etc.)
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    // ── Retrofit — type-safe HTTP client for Android ──────────────────────────
+    // Core Retrofit library that handles HTTP calls and response parsing
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    // Gson converter: automatically serializes/deserializes JSON ↔ Java objects
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+
+    // ── OkHttp — the HTTP engine underlying Retrofit ──────────────────────────
+    // Main OkHttp library (Retrofit uses it internally, but declaring it
+    // explicitly lets us control the version)
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    // Logging interceptor: prints request/response details in Logcat during dev
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+
+    // ── Gson — JSON serialization (also pulled in by converter-gson) ──────────
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    // ── AndroidX core utilities ───────────────────────────────────────────────
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+}
