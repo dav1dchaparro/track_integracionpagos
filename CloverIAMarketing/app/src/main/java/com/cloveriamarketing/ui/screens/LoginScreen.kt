@@ -18,78 +18,83 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cloveriamarketing.ui.viewmodel.AuthUiState
+import com.cloveriamarketing.ui.viewmodel.AuthViewModel
 
 /**
- * Pantalla de Login de CloverIA Marketing.
+ * Pantalla de Login — conectada al backend real via AuthViewModel.
  *
- * En Compose, una pantalla es una función anotada con @Composable.
- * No hay XML, todo se construye con código Kotlin.
+ * Flujo completo:
+ * 1. Usuario escribe email y contraseña
+ * 2. Toca "Ingresar" → AuthViewModel.login()
+ * 3. AuthViewModel → AuthRepository → POST /auth/login
+ * 4. Si el backend responde 200 → guarda JWT → navega al Dashboard
+ * 5. Si responde 401 → muestra "Credenciales incorrectas"
+ * 6. Si no hay red → muestra "Sin conexión al servidor"
  *
- * Parámetros:
- * @param onLoginSuccess Función que se ejecuta cuando el login es correcto.
- *                       NavGraph la usa para navegar al Dashboard.
+ * @param onLoginSuccess Se ejecuta cuando el login fue exitoso → NavGraph navega al Dashboard
  */
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit) {
+fun LoginScreen(
+    onLoginSuccess: () -> Unit,
+    authViewModel: AuthViewModel = viewModel()
+) {
 
-    // ── Estado de los campos ──────────────────────────────────────
-    // `remember` + `mutableStateOf` = variable reactiva.
-    // Cada vez que cambia su valor, Compose re-dibuja los componentes que la usan.
-    var username by remember { mutableStateOf("") }
+    // ── Estado de los campos de texto ───────────────────────────
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
 
-    // ── Colores del tema ──────────────────────────────────────────
-    val darkBg = Color(0xFF0F172A)         // Fondo oscuro principal
-    val cardBg = Color(0xFF1E293B)         // Fondo de la tarjeta
-    val accentColor = Color(0xFF6366F1)    // Violeta — color principal de la app
-    val textColor = Color(0xFFF1F5F9)      // Texto claro
-    val subtextColor = Color(0xFF94A3B8)   // Texto secundario gris
+    // ── Observar el estado del ViewModel ────────────────────────
+    // Cada vez que uiState cambia, Compose re-dibuja automáticamente
+    val uiState = authViewModel.uiState
 
-    // ── UI ───────────────────────────────────────────────────────
-    // Box = contenedor que apila elementos. Acá lo usamos como fondo.
+    // Si el login fue exitoso, navegar al Dashboard
+    LaunchedEffect(uiState) {
+        if (uiState is AuthUiState.Success) {
+            onLoginSuccess()
+        }
+    }
+
+    // ── Colores del tema ────────────────────────────────────────
+    val darkBg = Color(0xFF0F172A)
+    val cardBg = Color(0xFF1E293B)
+    val accentColor = Color(0xFF6366F1)
+    val textColor = Color(0xFFF1F5F9)
+    val subtextColor = Color(0xFF94A3B8)
+
+    // ── UI ──────────────────────────────────────────────────────
     Box(
         modifier = Modifier
-            .fillMaxSize()                          // Ocupa toda la pantalla
-            .background(darkBg),                   // Color de fondo oscuro
-        contentAlignment = Alignment.Center         // Centra el contenido
+            .fillMaxSize()
+            .background(darkBg),
+        contentAlignment = Alignment.Center
     ) {
-
-        // Card = tarjeta con bordes redondeados y sombra
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp),      // Margen a los costados
+                .padding(horizontal = 24.dp),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = cardBg),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
-
-            // Column = apila elementos verticalmente (como un LinearLayout vertical)
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(32.dp),               // Padding interno
+                    .padding(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(20.dp)  // Espacio entre elementos
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-
-                // ── Logo / Título ─────────────────────────────────
-                Text(
-                    text = "📊",
-                    fontSize = 48.sp
-                )
-
+                // ── Logo / Título ───────────────────────────────
+                Text(text = "📊", fontSize = 48.sp)
                 Text(
                     text = "CloverIA Marketing",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = textColor
                 )
-
                 Text(
-                    text = "Ingresá para ver tu panel de ventas",
+                    text = "Ingresá tu email para ver tu panel de ventas",
                     fontSize = 14.sp,
                     color = subtextColor,
                     textAlign = TextAlign.Center
@@ -97,16 +102,15 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // ── Campo Usuario ─────────────────────────────────
-                // OutlinedTextField = campo de texto con borde. Similar a EditText en XML.
+                // ── Campo Email ─────────────────────────────────
                 OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },  // Actualiza el estado al escribir
-                    label = { Text("Usuario", color = subtextColor) },
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email", color = subtextColor) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Person,
-                            contentDescription = "Usuario",
+                            contentDescription = "Email",
                             tint = accentColor
                         )
                     },
@@ -119,10 +123,13 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                         unfocusedTextColor = textColor,
                         cursorColor = accentColor
                     ),
-                    singleLine = true   // No permite salto de línea
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    // Deshabilitar campo mientras se hace login
+                    enabled = uiState !is AuthUiState.Loading
                 )
 
-                // ── Campo Contraseña ──────────────────────────────
+                // ── Campo Contraseña ────────────────────────────
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -134,9 +141,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                             tint = accentColor
                         )
                     },
-                    // PasswordVisualTransformation = muestra puntos en lugar de texto
                     visualTransformation = PasswordVisualTransformation(),
-                    // KeyboardType.Password = el teclado sugiere contraseñas
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -147,49 +152,33 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                         unfocusedTextColor = textColor,
                         cursorColor = accentColor
                     ),
-                    singleLine = true
+                    singleLine = true,
+                    enabled = uiState !is AuthUiState.Loading
                 )
 
-                // ── Mensaje de error (solo se muestra si hay error) ──
-                if (errorMessage.isNotEmpty()) {
+                // ── Mensaje de error ────────────────────────────
+                if (uiState is AuthUiState.Error) {
                     Text(
-                        text = errorMessage,
-                        color = Color(0xFFEF4444),   // Rojo
+                        text = (uiState as AuthUiState.Error).message,
+                        color = Color(0xFFEF4444),
                         fontSize = 13.sp,
                         textAlign = TextAlign.Center
                     )
                 }
 
-                // ── Botón Ingresar ────────────────────────────────
+                // ── Botón Ingresar ──────────────────────────────
                 Button(
                     onClick = {
-                        // Validación básica de campos vacíos
-                        if (username.isBlank() || password.isBlank()) {
-                            errorMessage = "Completá usuario y contraseña"
-                            return@Button
-                        }
-
-                        // ─────────────────────────────────────────────
-                        // FASE 1: Validación local (datos hardcodeados)
-                        // FASE 2: Reemplazar por llamada a POST /api/auth/login
-                        // ─────────────────────────────────────────────
-                        if (username == "demo" && password == "demo123") {
-                            errorMessage = ""
-                            isLoading = true
-                            onLoginSuccess()   // Navega al Dashboard
-                        } else {
-                            errorMessage = "Usuario o contraseña incorrectos"
-                        }
+                        authViewModel.login(email, password)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = accentColor),
-                    enabled = !isLoading
+                    enabled = uiState !is AuthUiState.Loading
                 ) {
-                    // Muestra spinner o texto según el estado
-                    if (isLoading) {
+                    if (uiState is AuthUiState.Loading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
                             color = Color.White,
@@ -205,10 +194,10 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     }
                 }
 
-                // ── Botón acceso demo rápido ──────────────────────
+                // ── Botón demo rápido ───────────────────────────
                 TextButton(
                     onClick = {
-                        username = "demo"
+                        email = "demo@smartreceipt.com"
                         password = "demo123"
                     }
                 ) {
@@ -219,9 +208,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     )
                 }
 
-                // ── Credenciales de ayuda ─────────────────────────
                 Text(
-                    text = "demo / demo123",
+                    text = "demo@smartreceipt.com / demo123",
                     color = subtextColor,
                     fontSize = 12.sp
                 )

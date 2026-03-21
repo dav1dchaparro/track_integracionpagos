@@ -7,34 +7,45 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cloveriamarketing.data.model.DashboardStats
-import com.cloveriamarketing.data.model.FakeData
-import com.cloveriamarketing.data.model.RecentSale
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cloveriamarketing.data.remote.DashboardDto
+import com.cloveriamarketing.data.remote.SaleDto
+import com.cloveriamarketing.ui.viewmodel.DashboardUiState
+import com.cloveriamarketing.ui.viewmodel.DashboardViewModel
 
 /**
- * Pantalla principal del Dashboard.
+ * Pantalla principal del Dashboard — conectada al backend real.
  *
- * Muestra:
- * - Estadísticas clave (revenue, ventas, ticket promedio)
- * - Producto estrella
- * - Lista de ventas recientes
+ * Ya NO usa FakeData. Los datos vienen de:
+ * - GET /dashboard/summary → KPIs, top productos, métodos de pago
+ * - GET /sales/ → lista de ventas recientes
  *
- * @param onLogout Función que se ejecuta al presionar "Cerrar sesión".
- *                 NavGraph la usa para volver al Login.
+ * Flujo:
+ * 1. La pantalla se muestra → LaunchedEffect llama viewModel.loadDashboard()
+ * 2. DashboardViewModel hace las requests HTTP en background
+ * 3. Cuando llegan los datos → uiState cambia a Success
+ * 4. Compose re-dibuja automáticamente con los datos reales
+ *
+ * @param onLogout Función que NavGraph usa para volver al Login
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(onLogout: () -> Unit) {
-
-    // ── Colores ───────────────────────────────────────────────────
+fun DashboardScreen(
+    onLogout: () -> Unit,
+    dashboardViewModel: DashboardViewModel = viewModel()
+) {
+    // ── Colores ─────────────────────────────────────────────────
     val darkBg = Color(0xFF0F172A)
     val cardBg = Color(0xFF1E293B)
     val accentColor = Color(0xFF6366F1)
@@ -42,26 +53,37 @@ fun DashboardScreen(onLogout: () -> Unit) {
     val subtextColor = Color(0xFF94A3B8)
     val greenColor = Color(0xFF22C55E)
 
-    // ── Datos ─────────────────────────────────────────────────────
-    // FASE 1: Datos fake. FASE 2: Reemplazar por llamada a la API.
-    val stats = FakeData.dashboardStats
-    val sales = FakeData.recentSales
+    // ── Cargar datos al entrar a la pantalla ────────────────────
+    // LaunchedEffect(Unit) = se ejecuta UNA vez cuando la pantalla se muestra
+    LaunchedEffect(Unit) {
+        dashboardViewModel.loadDashboard()
+    }
 
-    // ── UI ────────────────────────────────────────────────────────
-    // Scaffold = estructura base con TopBar + contenido
+    val uiState = dashboardViewModel.uiState
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "📊 CloverIA Marketing",
-                        color = textColor,
-                        fontWeight = FontWeight.Bold
-                    )
+                    val title = when (uiState) {
+                        is DashboardUiState.Success -> "📊 ${uiState.storeName}"
+                        else -> "📊 CloverIA Marketing"
+                    }
+                    Text(text = title, color = textColor, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 },
                 actions = {
-                    // Botón de logout en la esquina superior derecha
-                    IconButton(onClick = onLogout) {
+                    // Botón refrescar datos
+                    IconButton(onClick = { dashboardViewModel.loadDashboard() }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Actualizar",
+                            tint = subtextColor
+                        )
+                    }
+                    // Botón logout
+                    IconButton(onClick = {
+                        dashboardViewModel.logout { onLogout() }
+                    }) {
                         Icon(
                             imageVector = Icons.Default.ExitToApp,
                             contentDescription = "Cerrar sesión",
@@ -75,66 +97,163 @@ fun DashboardScreen(onLogout: () -> Unit) {
         containerColor = darkBg
     ) { paddingValues ->
 
-        // LazyColumn = lista que solo renderiza los elementos visibles.
-        // Es el equivalente a RecyclerView en el sistema de vistas tradicional.
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(vertical = 16.dp)
-        ) {
-
-            // ── Fila de estadísticas ──────────────────────────────
-            // `item { }` = un elemento único en la lista (no repetido)
-            item {
-                Text(
-                    text = "Resumen del período",
-                    color = subtextColor,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            item {
-                // Row = apila elementos horizontalmente
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+        when (uiState) {
+            // ── Estado Loading: spinner centrado ─────────────────
+            is DashboardUiState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
                 ) {
-                    // Las tres tarjetas de KPI comparten el espacio equitativamente
-                    StatCard(
-                        modifier = Modifier.weight(1f),
-                        label = "Ingresos",
-                        value = "$${String.format("%.0f", stats.totalRevenue)}",
-                        icon = "💰",
-                        cardBg = cardBg,
-                        textColor = textColor,
-                        valueColor = greenColor
-                    )
-                    StatCard(
-                        modifier = Modifier.weight(1f),
-                        label = "Ventas",
-                        value = "${stats.totalSales}",
-                        icon = "🛒",
-                        cardBg = cardBg,
-                        textColor = textColor,
-                        valueColor = accentColor
-                    )
-                    StatCard(
-                        modifier = Modifier.weight(1f),
-                        label = "Ticket prom.",
-                        value = "$${String.format("%.2f", stats.averageTicket)}",
-                        icon = "🎫",
-                        cardBg = cardBg,
-                        textColor = textColor,
-                        valueColor = Color(0xFFF59E0B)   // Amarillo
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator(color = accentColor)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Cargando datos del backend...", color = subtextColor)
+                    }
                 }
             }
 
-            // ── Tarjeta producto estrella ─────────────────────────
+            // ── Estado Error: mensaje + botón reintentar ────────
+            is DashboardUiState.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("⚠️", fontSize = 48.sp)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = uiState.message,
+                            color = Color(0xFFEF4444),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 32.dp)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = { dashboardViewModel.loadDashboard() },
+                            colors = ButtonDefaults.buttonColors(containerColor = accentColor)
+                        ) {
+                            Text("Reintentar", color = Color.White)
+                        }
+                    }
+                }
+            }
+
+            // ── Estado Success: datos reales del backend ────────
+            is DashboardUiState.Success -> {
+                DashboardContent(
+                    dashboard = uiState.dashboard,
+                    recentSales = uiState.recentSales,
+                    selectedPeriod = dashboardViewModel.selectedPeriod,
+                    onPeriodChange = { dashboardViewModel.changePeriod(it) },
+                    paddingValues = paddingValues,
+                    cardBg = cardBg,
+                    textColor = textColor,
+                    subtextColor = subtextColor,
+                    accentColor = accentColor,
+                    greenColor = greenColor
+                )
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Contenido del Dashboard cuando los datos cargaron
+// ═══════════════════════════════════════════════════════════════
+
+@Composable
+private fun DashboardContent(
+    dashboard: DashboardDto,
+    recentSales: List<SaleDto>,
+    selectedPeriod: String,
+    onPeriodChange: (String) -> Unit,
+    paddingValues: PaddingValues,
+    cardBg: Color,
+    textColor: Color,
+    subtextColor: Color,
+    accentColor: Color,
+    greenColor: Color
+) {
+    val kpis = dashboard.kpis
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(vertical = 16.dp)
+    ) {
+
+        // ── Selector de período ─────────────────────────────────
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf("today" to "Hoy", "week" to "Semana", "month" to "Mes", "year" to "Año").forEach { (key, label) ->
+                    FilterChip(
+                        selected = selectedPeriod == key,
+                        onClick = { onPeriodChange(key) },
+                        label = { Text(label, fontSize = 12.sp) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = accentColor,
+                            selectedLabelColor = Color.White,
+                            containerColor = cardBg,
+                            labelColor = subtextColor
+                        )
+                    )
+                }
+            }
+        }
+
+        // ── KPIs principales ────────────────────────────────────
+        item {
+            Text("Resumen del período", color = subtextColor, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+        }
+
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    label = "Ingresos",
+                    value = "$${String.format("%.0f", kpis.totalRevenue)}",
+                    icon = "💰",
+                    cardBg = cardBg,
+                    textColor = textColor,
+                    valueColor = greenColor
+                )
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    label = "Ventas",
+                    value = "${kpis.totalOrders}",
+                    icon = "🛒",
+                    cardBg = cardBg,
+                    textColor = textColor,
+                    valueColor = accentColor
+                )
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    label = "Ticket prom.",
+                    value = "$${String.format("%.2f", kpis.avgTicket)}",
+                    icon = "🎫",
+                    cardBg = cardBg,
+                    textColor = textColor,
+                    valueColor = Color(0xFFF59E0B)
+                )
+            }
+        }
+
+        // ── Producto estrella ───────────────────────────────────
+        if (dashboard.topProducts.isNotEmpty()) {
+            val topProduct = dashboard.topProducts.first()
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -149,21 +268,22 @@ fun DashboardScreen(onLogout: () -> Unit) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
-                            Text(
-                                text = "⭐ Producto estrella",
-                                color = subtextColor,
-                                fontSize = 12.sp
-                            )
+                            Text("⭐ Producto estrella", color = subtextColor, fontSize = 12.sp)
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = stats.topProduct,
+                                text = topProduct.name,
                                 color = textColor,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
+                            Text(
+                                text = "${topProduct.units} unidades vendidas",
+                                color = subtextColor,
+                                fontSize = 12.sp
+                            )
                         }
                         Text(
-                            text = "$${String.format("%.0f", stats.topProductRevenue)}",
+                            text = "$${String.format("%.0f", topProduct.revenue)}",
                             color = greenColor,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
@@ -171,22 +291,60 @@ fun DashboardScreen(onLogout: () -> Unit) {
                     }
                 }
             }
+        }
 
-            // ── Título de la lista ────────────────────────────────
+        // ── Métodos de pago ─────────────────────────────────────
+        if (dashboard.paymentMethods.isNotEmpty()) {
             item {
-                Text(
-                    text = "Ventas recientes",
-                    color = subtextColor,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                Text("Métodos de pago", color = subtextColor, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+            }
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = cardBg)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        dashboard.paymentMethods.forEach { (method, detail) ->
+                            val icon = when (method) {
+                                "card" -> "💳"
+                                "qr" -> "📱"
+                                else -> "💰"
+                            }
+                            val label = when (method) {
+                                "card" -> "Tarjeta"
+                                "qr" -> "QR"
+                                else -> method.uppercase()
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 6.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("$icon $label (${detail.count})", color = textColor, fontSize = 14.sp)
+                                Text(
+                                    "$${String.format("%.2f", detail.total)}",
+                                    color = greenColor,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── Ventas recientes ────────────────────────────────────
+        if (recentSales.isNotEmpty()) {
+            item {
+                Text("Ventas recientes", color = subtextColor, fontSize = 13.sp, fontWeight = FontWeight.Medium)
             }
 
-            // ── Lista de ventas ───────────────────────────────────
-            // `items(lista)` = itera la lista y llama al bloque por cada elemento.
-            // Compose solo renderiza los que están en pantalla (lazy).
-            items(sales) { sale ->
-                SaleItem(
+            items(recentSales) { sale ->
+                SaleItemCard(
                     sale = sale,
                     cardBg = cardBg,
                     textColor = textColor,
@@ -199,17 +357,10 @@ fun DashboardScreen(onLogout: () -> Unit) {
     }
 }
 
-// ─────────────────────────────────────────────────────────────
-//  Componente: Tarjeta de estadística (KPI)
-// ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  Componente: Tarjeta KPI
+// ═══════════════════════════════════════════════════════════════
 
-/**
- * Tarjeta pequeña para mostrar un número clave.
- * Se usa en la fila de KPIs del dashboard.
- *
- * Es un @Composable reutilizable — la misma tarjeta sirve para
- * Ingresos, Ventas y Ticket promedio, solo cambian los parámetros.
- */
 @Composable
 fun StatCard(
     modifier: Modifier = Modifier,
@@ -233,45 +384,42 @@ fun StatCard(
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(text = icon, fontSize = 24.sp)
-            Text(
-                text = value,
-                color = valueColor,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = label,
-                color = textColor.copy(alpha = 0.7f),
-                fontSize = 11.sp
-            )
+            Text(text = value, color = valueColor, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(text = label, color = textColor.copy(alpha = 0.7f), fontSize = 11.sp)
         }
     }
 }
 
-// ─────────────────────────────────────────────────────────────
-//  Componente: Fila de venta individual
-// ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  Componente: Fila de venta (usando SaleDto real del backend)
+// ═══════════════════════════════════════════════════════════════
 
-/**
- * Fila de la lista "Ventas recientes".
- * Muestra: icono del método de pago | producto | hora | monto
- */
 @Composable
-fun SaleItem(
-    sale: RecentSale,
+fun SaleItemCard(
+    sale: SaleDto,
     cardBg: Color,
     textColor: Color,
     subtextColor: Color,
     accentColor: Color,
     greenColor: Color
 ) {
-    // Ícono según el método de pago
     val paymentIcon = when (sale.paymentMethod) {
-        "CARD"   -> "💳"
-        "CASH"   -> "💵"
-        "DEBIT"  -> "💳"
-        "CREDIT" -> "💳"
-        else     -> "💰"
+        "card" -> "💳"
+        "qr" -> "📱"
+        else -> "💰"
+    }
+
+    val paymentLabel = when (sale.paymentMethod) {
+        "card" -> sale.cardBrand?.uppercase() ?: "TARJETA"
+        "qr" -> "QR"
+        else -> sale.paymentMethod.uppercase()
+    }
+
+    // Extraer hora de la fecha ISO (ej: "2026-03-21T14:30:00" → "14:30")
+    val time = try {
+        sale.soldAt.substring(11, 16)
+    } catch (e: Exception) {
+        ""
     }
 
     Card(
@@ -286,13 +434,10 @@ fun SaleItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-
-            // Ícono + datos de la venta
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Círculo con el ícono del método de pago
                 Box(
                     modifier = Modifier
                         .size(40.dp)
@@ -304,25 +449,22 @@ fun SaleItem(
                 ) {
                     Text(text = paymentIcon, fontSize = 18.sp)
                 }
-
                 Column {
                     Text(
-                        text = sale.product,
+                        text = "#${sale.invoiceNumber}",
                         color = textColor,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = "${sale.time} · ${sale.paymentMethod}",
+                        text = "$time · $paymentLabel · ${sale.items.size} items",
                         color = subtextColor,
                         fontSize = 12.sp
                     )
                 }
             }
-
-            // Monto de la venta
             Text(
-                text = "$${String.format("%.2f", sale.amount)}",
+                text = "$${String.format("%.2f", sale.total)}",
                 color = greenColor,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold
