@@ -56,6 +56,9 @@ public class Dashboard {
         @SerializedName("name")
         private String name;
 
+
+        
+
         @SerializedName("revenue")
         private double revenue;
 
