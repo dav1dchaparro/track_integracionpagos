@@ -2,16 +2,17 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, BarChart3, FileText, Settings, Users,
-  TrendingUp, X, Search, ChevronRight, Crown, LogOut,
+  TrendingUp, X, Search, ChevronRight, Crown, LogOut, ShoppingCart,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const OWNER_NAV = [
-  { to: '/',          icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/analytics', icon: BarChart3,       label: 'Analytics',  badge: 'IA' },
-  { to: '/reports',   icon: FileText,        label: 'Reports',    badge: '3' },
-  { to: '/users',     icon: Users,           label: 'Equipo',     badge: 'new' },
-  { to: '/settings',  icon: Settings,        label: 'Ajustes' },
+  { to: '/',                   icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/analytics',          icon: BarChart3,       label: 'Analytics',         badge: 'IA'  },
+  { to: '/purchase-patterns',  icon: ShoppingCart,    label: 'Pat. de Compra',    badge: 'new' },
+  { to: '/reports',            icon: FileText,        label: 'Reportes',          badge: '3'   },
+  { to: '/users',              icon: Users,           label: 'Equipo' },
+  { to: '/settings',           icon: Settings,        label: 'Ajustes' },
 ]
 
 const SELLER_BASE_NAV = [
