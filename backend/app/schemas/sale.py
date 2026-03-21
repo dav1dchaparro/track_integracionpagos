@@ -54,7 +54,7 @@ class SaleCreate(BaseModel):
     card_brand: CardBrand | None = None
     card_category: CardCategory | None = None
     items: list[SaleItemCreate]
-    sold_at: datetime
+    sold_at: datetime | None = None
 
 
 class SaleResponse(BaseModel):
@@ -67,6 +67,5 @@ class SaleResponse(BaseModel):
     total: float
     items: list[SaleItemResponse]
     sold_at: datetime
-    created_at: datetime
 
     model_config = {"from_attributes": True}

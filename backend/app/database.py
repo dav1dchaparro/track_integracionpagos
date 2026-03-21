@@ -62,4 +62,14 @@ def init_db(database: Database) -> None:
 
 def get_db() -> Session:
     assert _database is not None, "Call init_db() first"
-    yield _database.session
+    if hasattr(_database, "_factory"):
+        session = _database._factory()
+        try:
+            yield session
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+    else:
+        yield _database.session

@@ -12,6 +12,10 @@ class ProductCreate(BaseModel):
     category_ids: list[uuid.UUID]
 
 
+class ProductUpdate(BaseModel):
+    category_ids: list[uuid.UUID]
+
+
 class ProductResponse(BaseModel):
     id: uuid.UUID
     name: str

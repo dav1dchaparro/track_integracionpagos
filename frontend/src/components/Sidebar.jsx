@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, BarChart3, FileText, Settings, Users,
   TrendingUp, X, Search, ChevronRight, Crown, LogOut, ShoppingCart,
+  Tag, Package,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
@@ -11,6 +12,8 @@ const OWNER_NAV = [
   { to: '/analytics',          icon: BarChart3,       label: 'Analytics',         badge: 'IA'  },
   { to: '/purchase-patterns',  icon: ShoppingCart,    label: 'Pat. de Compra',    badge: 'new' },
   { to: '/reports',            icon: FileText,        label: 'Reportes',          badge: '3'   },
+  { to: '/categories',          icon: Tag,             label: 'Categorias' },
+  { to: '/products',            icon: Package,         label: 'Productos' },
   { to: '/users',              icon: Users,           label: 'Equipo' },
   { to: '/settings',           icon: Settings,        label: 'Ajustes' },
 ]

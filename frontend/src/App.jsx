@@ -12,6 +12,8 @@ import Register from './pages/Register'
 import SellerDashboard from './pages/SellerDashboard'
 import UserManagement from './pages/UserManagement'
 import PurchasePatterns from './pages/PurchasePatterns'
+import Categories from './pages/Categories'
+import Products from './pages/Products'
 
 function AppInner() {
   const { user, getPerms } = useAuth()
@@ -74,6 +76,9 @@ function AppInner() {
                 path="/purchase-patterns"
                 element={user.role === 'owner' ? <PurchasePatterns /> : <Navigate to="/" replace />}
               />
+
+              <Route path="/categories" element={<Categories />} />
+              <Route path="/products" element={<Products />} />
 
               {/* Available for all */}
               <Route path="/settings" element={<Settings />} />

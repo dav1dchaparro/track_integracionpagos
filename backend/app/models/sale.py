@@ -23,7 +23,6 @@ class Sale(Base):
         name="card_category_enum",
     ), nullable=True)
     total: Mapped[float] = mapped_column(Numeric(12, 2))
-    sold_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    sold_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     items = relationship("SaleItem", back_populates="sale", lazy="joined")

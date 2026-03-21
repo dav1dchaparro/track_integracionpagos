@@ -24,3 +24,15 @@ def create_access_token(user_id: str) -> str:
 
 def decode_access_token(token: str) -> dict:
     return jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+
+
+def decode_expired_token(token: str) -> dict | None:
+    """Decode a token even if expired (within 7 days)."""
+    try:
+        return jwt.decode(
+            token, settings.jwt_secret,
+            algorithms=[settings.jwt_algorithm],
+            options={"verify_exp": False},
+        )
+    except Exception:
+        return None

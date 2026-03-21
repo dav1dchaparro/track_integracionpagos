@@ -89,8 +89,11 @@ export default function Register() {
     if (!pwdMatch)      return setError('Las contraseñas no coinciden')
 
     setLoading(true)
-    await new Promise(r => setTimeout(r, 700))
-    const result = register(form)
+    const result = await register({
+      storeName: form.name,
+      email: form.email,
+      password: form.password,
+    })
     setLoading(false)
 
     if (result.success) navigate('/', { replace: true })
