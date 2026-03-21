@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 
@@ -25,6 +25,10 @@ class Database:
     @classmethod
     def for_testing(cls, database_url: str) -> "Database":
         engine = create_engine(database_url)
+        with engine.connect() as conn:
+            conn.execute(text("DROP SCHEMA public CASCADE"))
+            conn.execute(text("CREATE SCHEMA public"))
+            conn.commit()
         Base.metadata.create_all(engine)
         connection = engine.connect()
         transaction = connection.begin()

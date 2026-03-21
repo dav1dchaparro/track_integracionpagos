@@ -1,3 +1,17 @@
+# Task 3: Rewrite Sale model + SaleItem model
+
+**Files:**
+- Modify: `app/models/sale.py` (full rewrite)
+- Create: `app/models/sale_item.py`
+- Modify: `app/models/__init__.py`
+
+---
+
+## Step 1: Rewrite Sale model
+
+File: `app/models/sale.py` (replace entirely)
+
+```python
 import uuid
 from datetime import datetime, timezone
 
@@ -27,3 +41,41 @@ class Sale(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     items = relationship("SaleItem", back_populates="sale", lazy="joined")
+```
+
+## Step 2: Create SaleItem model
+
+File: `app/models/sale_item.py`
+
+```python
+import uuid
+
+from sqlalchemy import ForeignKey, Integer, Numeric
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.database import Base
+
+
+class SaleItem(Base):
+    __tablename__ = "sale_items"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    sale_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("sales.id"))
+    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"))
+    quantity: Mapped[int] = mapped_column(Integer)
+    subtotal: Mapped[float] = mapped_column(Numeric(12, 2))
+
+    sale = relationship("Sale", back_populates="items")
+    product = relationship("Product", lazy="joined")
+```
+
+## Step 3: Update `app/models/__init__.py`
+
+```python
+from app.models.user import User
+from app.models.category import Category
+from app.models.product import Product
+from app.models.sale import Sale
+from app.models.sale_item import SaleItem
+```

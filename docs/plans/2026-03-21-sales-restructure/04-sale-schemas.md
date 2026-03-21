@@ -1,3 +1,15 @@
+# Task 4: Sale + SaleItem schemas
+
+**Files:**
+- Modify: `app/schemas/sale.py` (full rewrite)
+
+---
+
+## Step 1: Rewrite sale schemas
+
+File: `app/schemas/sale.py` (replace entirely)
+
+```python
 import uuid
 from datetime import datetime
 from enum import Enum
@@ -70,3 +82,4 @@ class SaleResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+```

@@ -1,3 +1,15 @@
+# Task 5: Rewrite sales router
+
+**Files:**
+- Modify: `app/routers/sales.py` (full rewrite)
+
+---
+
+## Step 1: Rewrite sales router
+
+File: `app/routers/sales.py` (replace entirely)
+
+```python
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -20,6 +32,7 @@ async def create_sale(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    # Validate card fields when payment_method is "card"
     if data.payment_method == "card":
         if not data.card_type or not data.card_brand:
             raise HTTPException(
@@ -33,11 +46,12 @@ async def create_sale(
             detail="At least one item is required",
         )
 
+    # Fetch all products and validate they belong to the user
     product_ids = [item.product_id for item in data.items]
     result = db.execute(
         select(Product).where(Product.id.in_(product_ids), Product.user_id == user.id)
     )
-    products = {p.id: p for p in result.unique().scalars().all()}
+    products = {p.id: p for p in result.scalars().all()}
 
     if len(products) != len(set(product_ids)):
         raise HTTPException(
@@ -45,6 +59,7 @@ async def create_sale(
             detail="One or more products not found",
         )
 
+    # Build sale items and calculate total
     total = 0
     sale_items = []
     for item in data.items:
@@ -101,3 +116,4 @@ def list_sales(
     query = query.order_by(Sale.sold_at.desc()).offset(skip).limit(limit)
     result = db.execute(query)
     return result.unique().scalars().all()
+```

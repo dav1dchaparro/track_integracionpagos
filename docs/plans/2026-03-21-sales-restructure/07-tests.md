@@ -1,3 +1,14 @@
+# Task 7: Rewrite tests
+
+**Files:**
+- Modify: `tests/test_sales.py` (full rewrite)
+- Modify: `tests/test_stream.py` (update setup to new sale format)
+
+---
+
+## Step 1: Rewrite `tests/test_sales.py`
+
+```python
 from datetime import datetime, timezone
 
 
@@ -82,7 +93,9 @@ def test_create_sale_no_items(client):
 
 def test_create_sale_multiple_items(client):
     headers, product_id1 = _setup(client, "sale5@example.com")
-    resp = client.post("/categories/", json={"name": "Food"}, headers=headers)
+    # Create second product
+    resp = client.post("/categories/", json={"name": "Food"},
+                       headers=headers)
     cat_id = resp.json()["id"]
     resp = client.post("/products/", json={
         "name": "Sandwich", "price": 7.00, "category_ids": [cat_id],
@@ -100,7 +113,7 @@ def test_create_sale_multiple_items(client):
     }, headers=headers)
     assert resp.status_code == 201
     data = resp.json()
-    assert data["total"] == 16.00
+    assert data["total"] == 16.00  # (4.50 * 2) + (7.00 * 1)
     assert len(data["items"]) == 2
 
 
@@ -138,3 +151,74 @@ def test_list_sales_filter_by_payment_method(client):
     assert resp.status_code == 200
     assert len(resp.json()) == 1
     assert resp.json()[0]["payment_method"] == "qr"
+```
+
+## Step 2: Update `tests/test_stream.py`
+
+Update `_setup` to create a category + product and use the new sale format:
+
+```python
+import threading
+from datetime import datetime, timezone
+
+
+def _setup(client, email="stream@example.com"):
+    client.post("/auth/register", json={
+        "store_name": "Stream Store", "email": email, "password": "secret123",
+    })
+    resp = client.post("/auth/login", json={"email": email, "password": "secret123"})
+    token = resp.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    resp = client.post("/categories/", json={"name": "Items"}, headers=headers)
+    cat_id = resp.json()["id"]
+
+    resp = client.post("/products/", json={
+        "name": "Test Item", "price": 10.00, "category_ids": [cat_id],
+    }, headers=headers)
+    product_id = resp.json()["id"]
+
+    return token, headers, product_id
+
+
+def test_sse_receives_new_sale(client):
+    token, headers, product_id = _setup(client, "sse1@example.com")
+
+    received = []
+
+    def listen():
+        with client.stream("GET", f"/stream/sales?token={token}") as resp:
+            for line in resp.iter_lines():
+                if line.startswith("data:"):
+                    received.append(line)
+                    break
+
+    listener = threading.Thread(target=listen)
+    listener.start()
+
+    import time
+    time.sleep(0.3)
+
+    client.post("/sales/", json={
+        "invoice_number": "F-SSE",
+        "payment_method": "qr",
+        "items": [{"product_id": product_id, "quantity": 1}],
+        "sold_at": datetime.now(timezone.utc).isoformat(),
+    }, headers=headers)
+
+    listener.join(timeout=5.0)
+    assert len(received) == 1
+
+
+def test_sse_invalid_token(client):
+    resp = client.get("/stream/sales?token=invalid")
+    assert resp.status_code == 401
+```
+
+## Step 3: Run tests
+
+```bash
+docker compose exec api python -m pytest -v --ignore=tests/test_stream.py
+```
+
+Expected: All PASS
