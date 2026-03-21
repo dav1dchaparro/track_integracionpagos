@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, BarChart3, FileText, Settings, Users,
-  TrendingUp, X, Search, ChevronRight, Crown, LogOut, ShoppingCart, Sparkles,
+  TrendingUp, X, Search, ChevronRight, Crown, LogOut, ShoppingCart, Sparkles, Megaphone,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
@@ -10,6 +10,7 @@ const OWNER_NAV = [
   { to: '/',                   icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/analytics',          icon: BarChart3,       label: 'Analytics',         badge: 'IA'  },
   { to: '/insights',           icon: Sparkles,        label: 'Insights',          badge: 'new' },
+  { to: '/marketing',          icon: Megaphone,       label: 'Marketing',         badge: 'IA'  },
   { to: '/purchase-patterns',  icon: ShoppingCart,    label: 'Pat. de Compra' },
   { to: '/reports',            icon: FileText,        label: 'Reportes',          badge: '3'   },
   { to: '/users',              icon: Users,           label: 'Equipo' },

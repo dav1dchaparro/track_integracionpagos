@@ -13,6 +13,7 @@ import SellerDashboard from './pages/SellerDashboard'
 import UserManagement from './pages/UserManagement'
 import PurchasePatterns from './pages/PurchasePatterns'
 import Insights from './pages/Insights'
+import Marketing from './pages/Marketing'
 
 function AppInner() {
   const { user, getPerms } = useAuth()
@@ -78,6 +79,10 @@ function AppInner() {
               <Route
                 path="/insights"
                 element={user.role === 'owner' ? <Insights /> : <Navigate to="/" replace />}
+              />
+              <Route
+                path="/marketing"
+                element={user.role === 'owner' ? <Marketing /> : <Navigate to="/" replace />}
               />
 
               {/* Available for all */}
