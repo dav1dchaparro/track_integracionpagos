@@ -1,17 +1,14 @@
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "sqlite:///./smartreceipt.db"
-    CLOVER_APP_ID: str = ""
-    CLOVER_APP_SECRET: str = ""
-    CLOVER_API_BASE_URL: str = "https://api.clover.com"
-    OPENAI_API_KEY: str = ""  # Opcional: para insights con GPT
-    SECRET_KEY: str = "smartreceipt-secret-key-change-in-prod"
-    DEBUG: bool = True
+    database_url: str
+    jwt_secret: str
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60
 
-    class Config:
-        env_file = ".env"
+    model_config = ConfigDict(env_file=".env", extra="ignore")
 
 
 settings = Settings()
