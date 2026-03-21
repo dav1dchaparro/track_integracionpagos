@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv01", "cv03", "cv04", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    letter-spacing: -0.011em;
+  }
+  * {
+    @apply antialiased;
+  }
+  h1, h2, h3 {
+    letter-spacing: -0.022em;
+  }
+  h4, h5, h6 {
+    letter-spacing: -0.014em;
+  }
+}
+
+@layer components {
+  /* ── Cards ────────────────────────────────────────────────── */
+  .card {
+    @apply bg-white dark:bg-gray-900 rounded-xl shadow-sm
+           border border-gray-100 dark:border-gray-800
+           transition-all duration-200;
+  }
+  .card-interactive {
+    @apply card cursor-pointer
+           hover:shadow-md hover:-translate-y-px
+           hover:border-green-200 dark:hover:border-green-800/60;
+  }
+
+  /* ── Buttons ──────────────────────────────────────────────── */
+  .btn {
+    @apply inline-flex items-center gap-2 font-semibold text-sm
+           rounded-lg px-4 py-2 transition-all duration-150
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1
+           active:scale-[0.975] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-green-600 hover:bg-green-500
+           text-white focus-visible:ring-green-500
+           shadow-sm hover:shadow-green-sm;
+  }
+  .btn-secondary {
+    @apply btn bg-white dark:bg-gray-800
+           border border-gray-200 dark:border-gray-700
+           text-gray-700 dark:text-gray-200
+           hover:border-gray-300 dark:hover:border-gray-600
+           hover:bg-gray-50 dark:hover:bg-gray-700/60
+           focus-visible:ring-gray-400;
+  }
+  .btn-ghost {
+    @apply btn text-gray-500 dark:text-gray-400
+           hover:bg-gray-100 dark:hover:bg-gray-800
+           hover:text-gray-800 dark:hover:text-gray-100;
+  }
+
+  /* ── Tabs ─────────────────────────────────────────────────── */
+  .tab-group {
+    @apply flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1 gap-0.5;
+  }
+  .tab-item {
+    @apply px-3 py-1.5 rounded-md text-xs font-semibold
+           transition-all duration-150 text-gray-500 dark:text-gray-400
+           hover:text-gray-800 dark:hover:text-gray-200;
+  }
+  .tab-item-active {
+    @apply tab-item bg-white dark:bg-gray-700
+           text-green-600 dark:text-green-400 shadow-sm;
+  }
+
+  /* ── Badges ───────────────────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-md
+           text-xs font-semibold tracking-tight;
+  }
+  .badge-green  { @apply badge bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400; }
+  .badge-red    { @apply badge bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400; }
+  .badge-yellow { @apply badge bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400; }
+
+  /* ── Skeleton ─────────────────────────────────────────────── */
+  .skeleton {
+    @apply rounded-lg bg-gray-200 dark:bg-gray-800;
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255,255,255,0.28) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s infinite;
+  }
+
+  /* ── Dropdown ─────────────────────────────────────────────── */
+  .dropdown-panel {
+    @apply absolute top-full left-0 mt-1.5 z-50
+           bg-white dark:bg-gray-900
+           border border-gray-200 dark:border-gray-700
+           rounded-xl shadow-xl overflow-hidden
+           animate-fade-in;
+  }
+  .dropdown-item {
+    @apply flex items-center justify-between w-full px-3.5 py-2.5
+           text-sm text-left
+           text-gray-700 dark:text-gray-300
+           hover:bg-gray-50 dark:hover:bg-gray-800
+           transition-colors duration-100;
+  }
+  .dropdown-item-active {
+    @apply dropdown-item font-semibold text-green-600 dark:text-green-400;
+  }
+
+  /* ── Input ────────────────────────────────────────────────── */
+  .input-field {
+    @apply w-full px-3.5 py-2.5 rounded-lg border border-gray-200
+           bg-gray-50 dark:bg-gray-800/60 dark:border-gray-700
+           text-sm text-gray-900 dark:text-gray-100
+           placeholder:text-gray-400
+           focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-400
+           focus:bg-white dark:focus:bg-gray-800
+           transition-all duration-150;
+  }
+}
+
+/* ── Dot grid background ────────────────────────────────────── */
+.bg-dot-pattern {
+  background-image: radial-gradient(circle, rgba(34,197,94,0.18) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { @apply bg-gray-300 dark:bg-gray-700 rounded-full; }
+::-webkit-scrollbar-thumb:hover { @apply bg-gray-400 dark:bg-gray-600; }
