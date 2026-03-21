@@ -12,12 +12,14 @@ import Register from './pages/Register'
 import SellerDashboard from './pages/SellerDashboard'
 import UserManagement from './pages/UserManagement'
 import PurchasePatterns from './pages/PurchasePatterns'
+import Insights from './pages/Insights'
+import Marketing from './pages/Marketing'
 import Categories from './pages/Categories'
 import Products from './pages/Products'
 
 function AppInner() {
   const { user, getPerms } = useAuth()
-  const [darkMode, setDarkMode] = useState(false)
+  const [darkMode, setDarkMode] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   // Not logged in → show login or register
@@ -34,7 +36,7 @@ function AppInner() {
 
   return (
     <div className={darkMode ? 'dark' : ''}>
-      <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
+      <div className="flex h-screen overflow-hidden" style={{ background: 'var(--scifi-bg)' }}>
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
@@ -75,6 +77,14 @@ function AppInner() {
               <Route
                 path="/purchase-patterns"
                 element={user.role === 'owner' ? <PurchasePatterns /> : <Navigate to="/" replace />}
+              />
+              <Route
+                path="/insights"
+                element={user.role === 'owner' ? <Insights /> : <Navigate to="/" replace />}
+              />
+              <Route
+                path="/marketing"
+                element={user.role === 'owner' ? <Marketing /> : <Navigate to="/" replace />}
               />
 
               <Route path="/categories" element={<Categories />} />

@@ -4,9 +4,9 @@ import { Menu, Search, Bell, Sun, Moon, User, LogOut, Settings, Plus, X, Check, 
 import { useAuth } from '../context/AuthContext'
 
 const typeStyles = {
-  success: 'bg-brand-500',
-  warning: 'bg-amber-500',
-  info:    'bg-blue-500',
+  success: '#00e676',
+  warning: '#fbbf24',
+  info:    '#38bdf8',
 }
 
 const OWNER_NOTIFS = [
@@ -53,12 +53,19 @@ export default function Header({ darkMode, onToggleDark, onToggleSidebar }) {
   }
 
   const initials = user?.initials || user?.name?.[0] || 'U'
-  const roleBadge = user?.role === 'owner' ? { label: 'Dueño', color: 'text-amber-500' } : { label: 'Vendedor', color: 'text-green-500' }
+  const roleBadge = user?.role === 'owner'
+    ? { label: 'Dueño', color: '#fbbf24' }
+    : { label: 'Vendedor', color: '#00e676' }
 
   return (
     <>
-      <header className="h-16 flex items-center gap-3 px-5 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 z-10">
-
+      <header
+        className="h-16 flex items-center gap-3 px-5 flex-shrink-0 z-10"
+        style={{
+          background: 'var(--scifi-sidebar)',
+          borderBottom: '1px solid var(--scifi-border)',
+        }}
+      >
         {/* Hamburger */}
         <button onClick={onToggleSidebar} className="btn-ghost p-2 rounded-xl">
           <Menu className="w-5 h-5" />
@@ -66,18 +73,22 @@ export default function Header({ darkMode, onToggleDark, onToggleSidebar }) {
 
         {/* Search */}
         <div className="flex-1 max-w-sm">
-          <div className={`flex items-center gap-2.5 px-3.5 py-2 rounded-lg border transition-all duration-150 ${
-            searchFocus
-              ? 'border-green-400/60 bg-white dark:bg-gray-800 shadow-sm'
-              : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80'
-          }`}>
-            <Search className={`w-4 h-4 flex-shrink-0 transition-colors ${searchFocus ? 'text-green-500' : 'text-gray-400'}`} />
+          <div
+            className="flex items-center gap-2.5 px-3.5 py-2 rounded-lg transition-all duration-150"
+            style={{
+              background: 'rgba(0,230,118,0.04)',
+              border: `1px solid ${searchFocus ? 'rgba(0,230,118,0.5)' : 'var(--scifi-border)'}`,
+              boxShadow: searchFocus ? '0 0 12px rgba(0,230,118,0.1)' : 'none',
+            }}
+          >
+            <Search className="w-4 h-4 flex-shrink-0" style={{ color: searchFocus ? '#00e676' : 'var(--scifi-text-muted)' }} />
             <input
               type="text"
               placeholder={user?.role === 'owner' ? 'Buscar métricas, reportes...' : 'Buscar órdenes...'}
               onFocus={() => setSearchFocus(true)}
               onBlur={() => setSearchFocus(false)}
-              className="bg-transparent text-sm outline-none w-full text-gray-700 dark:text-gray-200 placeholder-gray-400"
+              className="bg-transparent text-sm outline-none w-full"
+              style={{ color: 'var(--scifi-text)', caretColor: '#00e676' }}
             />
           </div>
         </div>
@@ -93,48 +104,70 @@ export default function Header({ darkMode, onToggleDark, onToggleSidebar }) {
             </button>
           )}
 
-          {/* Dark mode */}
+          {/* Dark mode toggle */}
           <button onClick={onToggleDark} className="btn-ghost p-2 rounded-xl" title={darkMode ? 'Modo claro' : 'Modo oscuro'}>
-            {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {darkMode
+              ? <Sun className="w-4 h-4" style={{ color: '#fbbf24' }} />
+              : <Moon className="w-4 h-4" />
+            }
           </button>
 
           {/* Notifications */}
           <div ref={notifsRef} className="relative">
             <button
               onClick={() => { setShowNotifs(!showNotifs); setShowProfile(false) }}
-              className={`relative btn-ghost p-2 rounded-xl ${showNotifs ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
+              className="relative btn-ghost p-2 rounded-xl"
+              style={showNotifs ? { background: 'rgba(0,230,118,0.08)', color: '#00e676' } : {}}
             >
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-gray-900 animate-pulse" />
+                <span
+                  className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full animate-pulse"
+                  style={{ background: '#f87171', boxShadow: '0 0 6px rgba(248,113,113,0.6)' }}
+                />
               )}
             </button>
 
             {showNotifs && (
-              <div className="absolute right-0 top-12 w-80 card shadow-xl z-50 overflow-hidden animate-scale-in">
-                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+              <div
+                className="absolute right-0 top-12 w-80 z-50 overflow-hidden animate-scale-in rounded-xl"
+                style={{ background: 'var(--scifi-card)', border: '1px solid var(--scifi-border)', boxShadow: '0 8px 40px rgba(0,0,0,0.7)' }}
+              >
+                <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--scifi-border)' }}>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-sm">Notificaciones</h3>
+                    <h3 className="font-bold text-sm" style={{ color: 'var(--scifi-text)' }}>Notificaciones</h3>
                     {unreadCount > 0 && <span className="badge-green">{unreadCount} nuevas</span>}
                   </div>
-                  <button onClick={markAllRead} className="text-xs text-brand-600 dark:text-brand-400 font-semibold hover:underline">
+                  <button onClick={markAllRead} className="text-xs font-semibold hover:underline" style={{ color: '#00e676' }}>
                     Marcar leídas
                   </button>
                 </div>
-                <div className="divide-y divide-gray-50 dark:divide-gray-800">
+                <div>
                   {notifs.map((n) => (
-                    <div key={n.id} className={`flex gap-3 px-4 py-3.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${n.unread ? '' : 'opacity-60'}`}>
-                      <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${typeStyles[n.type]}`} />
+                    <div
+                      key={n.id}
+                      className="flex gap-3 px-4 py-3.5 transition-colors"
+                      style={{
+                        borderBottom: '1px solid var(--scifi-border)',
+                        opacity: n.unread ? 1 : 0.5,
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,230,118,0.04)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <div
+                        className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
+                        style={{ background: typeStyles[n.type], boxShadow: `0 0 6px ${typeStyles[n.type]}` }}
+                      />
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug">{n.title}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">{n.desc}</p>
-                        <p className="text-[11px] text-gray-400 mt-1">Hace {n.time}</p>
+                        <p className="text-sm font-semibold leading-snug" style={{ color: 'var(--scifi-text)' }}>{n.title}</p>
+                        <p className="text-xs mt-0.5 leading-snug" style={{ color: 'var(--scifi-text-muted)' }}>{n.desc}</p>
+                        <p className="text-[11px] mt-1" style={{ color: 'var(--scifi-text-muted)' }}>Hace {n.time}</p>
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800 text-center">
-                  <button className="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline">
+                <div className="px-4 py-3 text-center">
+                  <button className="text-xs font-semibold hover:underline" style={{ color: '#00e676' }}>
                     Ver todas →
                   </button>
                 </div>
@@ -146,37 +179,44 @@ export default function Header({ darkMode, onToggleDark, onToggleSidebar }) {
           <div ref={profileRef} className="relative">
             <button
               onClick={() => { setShowProfile(!showProfile); setShowNotifs(false) }}
-              className={`flex items-center gap-2.5 p-1.5 pr-3 rounded-xl border transition-all duration-200 ${
-                showProfile
-                  ? 'border-brand-300 bg-brand-50 dark:bg-brand-950/20 dark:border-brand-700'
-                  : 'border-transparent hover:border-gray-200 dark:hover:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
-              }`}
+              className="flex items-center gap-2.5 p-1.5 pr-3 rounded-xl border transition-all duration-200"
+              style={{
+                border: showProfile ? '1px solid rgba(0,230,118,0.4)' : '1px solid transparent',
+                background: showProfile ? 'rgba(0,230,118,0.06)' : 'transparent',
+              }}
+              onMouseEnter={e => { if (!showProfile) e.currentTarget.style.border = '1px solid var(--scifi-border)' }}
+              onMouseLeave={e => { if (!showProfile) e.currentTarget.style.border = '1px solid transparent' }}
             >
-              <div className="w-7 h-7 rounded-md flex items-center justify-center text-white text-xs font-bold flex-shrink-0 bg-gray-700 border border-gray-600/60">
+              <div
+                className="w-7 h-7 rounded-md flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                style={{ background: 'rgba(0,230,118,0.12)', border: '1px solid rgba(0,230,118,0.3)', color: '#00e676' }}
+              >
                 {initials}
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-xs font-bold text-gray-900 dark:text-white leading-none">
+                <p className="text-xs font-bold leading-none" style={{ color: 'var(--scifi-text)' }}>
                   {user?.name?.split(' ')[0] || 'Usuario'}
                 </p>
-                <p className={`text-[10px] mt-0.5 font-semibold ${roleBadge.color}`}>{roleBadge.label}</p>
+                <p className="text-[10px] mt-0.5 font-semibold" style={{ color: roleBadge.color }}>
+                  {roleBadge.label}
+                </p>
               </div>
             </button>
 
             {showProfile && (
-              <div className="absolute right-0 top-12 w-56 card shadow-xl z-50 overflow-hidden animate-scale-in">
-                <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+              <div
+                className="absolute right-0 top-12 w-56 z-50 overflow-hidden animate-scale-in rounded-xl"
+                style={{ background: 'var(--scifi-card)', border: '1px solid var(--scifi-border)', boxShadow: '0 8px 40px rgba(0,0,0,0.7)' }}
+              >
+                <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--scifi-border)' }}>
                   <div className="flex items-center gap-2 mb-0.5">
-                    <p className="font-bold text-sm text-gray-900 dark:text-white">{user?.name}</p>
+                    <p className="font-bold text-sm" style={{ color: 'var(--scifi-text)' }}>{user?.name}</p>
                     {user?.role === 'owner'
-                      ? <Crown className="w-3.5 h-3.5 text-amber-500" />
-                      : <Shield className="w-3.5 h-3.5 text-green-500" />
+                      ? <Crown className="w-3.5 h-3.5" style={{ color: '#fbbf24' }} />
+                      : <Shield className="w-3.5 h-3.5" style={{ color: '#00e676' }} />
                     }
                   </div>
-                  <p className="text-xs text-gray-400">{user?.email}</p>
-                  {user?.department && (
-                    <p className="text-[11px] text-gray-400 mt-0.5">{user.department}</p>
-                  )}
+                  <p className="text-xs" style={{ color: 'var(--scifi-text-muted)' }}>{user?.email}</p>
                 </div>
                 <div className="p-1.5">
                   {[
@@ -185,15 +225,18 @@ export default function Header({ darkMode, onToggleDark, onToggleSidebar }) {
                   ].map(({ icon: Icon, label, to }) => (
                     <button key={label} onClick={() => { navigate(to); setShowProfile(false) }}
                       className="dropdown-item rounded-lg w-full gap-2.5">
-                      <Icon className="w-4 h-4 text-gray-400" />
+                      <Icon className="w-4 h-4" style={{ color: 'var(--scifi-text-muted)' }} />
                       {label}
                     </button>
                   ))}
                 </div>
-                <div className="p-1.5 border-t border-gray-100 dark:border-gray-800">
+                <div className="p-1.5" style={{ borderTop: '1px solid var(--scifi-border)' }}>
                   <button
                     onClick={handleLogout}
-                    className="dropdown-item rounded-lg w-full gap-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    className="flex items-center justify-between w-full px-3.5 py-2.5 text-sm text-left rounded-lg gap-2.5 transition-colors"
+                    style={{ color: '#f87171' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.08)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
                     <LogOut className="w-4 h-4" />
                     Cerrar sesión
@@ -208,15 +251,16 @@ export default function Header({ darkMode, onToggleDark, onToggleSidebar }) {
       {/* ── Add Widget Modal (owner only) ── */}
       {showWidget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowWidget(false)}>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in" />
           <div
-            className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg animate-scale-in overflow-hidden"
+            className="relative rounded-2xl w-full max-w-lg animate-scale-in overflow-hidden"
+            style={{ background: 'var(--scifi-card)', border: '1px solid var(--scifi-border)', boxShadow: '0 0 40px rgba(0,230,118,0.1), 0 20px 60px rgba(0,0,0,0.8)' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center justify-between p-6" style={{ borderBottom: '1px solid var(--scifi-border)' }}>
               <div>
-                <h2 className="font-bold text-gray-900 dark:text-white">Añadir Widget</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Personaliza tu dashboard</p>
+                <h2 className="font-bold" style={{ color: 'var(--scifi-text)' }}>Añadir Widget</h2>
+                <p className="text-sm mt-0.5" style={{ color: 'var(--scifi-text-muted)' }}>Personaliza tu dashboard</p>
               </div>
               <button onClick={() => setShowWidget(false)} className="btn-ghost p-2 rounded-xl">
                 <X className="w-5 h-5" />
@@ -234,12 +278,21 @@ export default function Header({ darkMode, onToggleDark, onToggleSidebar }) {
                 <button
                   key={w.label}
                   onClick={() => setShowWidget(false)}
-                  className="flex items-start gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/20 dark:hover:border-brand-600 transition-all duration-200 text-left group"
+                  className="flex items-start gap-3 p-4 rounded-xl text-left group transition-all duration-200"
+                  style={{ border: '1px solid var(--scifi-border)', background: 'var(--scifi-surface)' }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.border = '1px solid rgba(0,230,118,0.4)'
+                    e.currentTarget.style.background = 'rgba(0,230,118,0.06)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.border = '1px solid var(--scifi-border)'
+                    e.currentTarget.style.background = 'var(--scifi-surface)'
+                  }}
                 >
                   <span className="text-2xl">{w.icon}</span>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-brand-700 dark:group-hover:text-brand-400 transition-colors">{w.label}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{w.desc}</p>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--scifi-text)' }}>{w.label}</p>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--scifi-text-muted)' }}>{w.desc}</p>
                   </div>
                 </button>
               ))}
