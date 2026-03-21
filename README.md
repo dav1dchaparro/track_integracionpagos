@@ -23,60 +23,83 @@ SmartReceipt se conecta a Clover, lee las transacciones y las analiza automátic
 | ORM | SQLAlchemy |
 | Validación | Pydantic v2 |
 | Integración pagos | Clover REST API + Webhooks |
-| Frontend | Android (Java) |
+| Frontend web | HTML + CSS + JS (sin frameworks) |
+| App Android | Java + Retrofit |
 
 ---
 
 ## Estructura del proyecto
 
 ```
-backend/
-├── main.py                          # Punto de entrada de la API
-├── requirements.txt                 # Dependencias Python
-├── .env.example                     # Variables de entorno (copiar como .env)
-├── seed_demo.py                     # Genera datos de demo para el hackathon
-└── app/
-    ├── config.py                    # Configuración (Clover keys, DB URL)
-    ├── database.py                  # Conexión a la base de datos
-    ├── models/                      # Tablas de la base de datos
-    │   ├── merchant.py              # Comerciantes
-    │   ├── transaction.py           # Transacciones/ventas
-    │   └── insight.py               # Insights generados por IA
-    ├── schemas/                     # Validación de datos de entrada/salida
-    ├── routers/                     # Endpoints de la API
-    │   ├── merchants.py             # CRUD comerciantes
-    │   ├── transactions.py          # Recibir y listar ventas
-    │   ├── insights.py              # Ver y generar insights
-    │   ├── dashboard.py             # Resumen completo para el app
-    │   └── clover.py                # Webhooks de Clover
-    └── services/
-        ├── ai_service.py            # Motor de análisis con IA
-        └── clover_service.py        # Integración con la API de Clover
+smartreceipt/
+├── backend/                         # API REST con FastAPI
+│   ├── main.py                      # Punto de entrada
+│   ├── requirements.txt             # Dependencias Python
+│   ├── seed_demo.py                 # Genera 2000+ transacciones de demo
+│   ├── ARCHITECTURE.md              # Arquitectura del backend
+│   └── app/
+│       ├── config.py                # Variables de entorno (Clover keys, DB)
+│       ├── database.py              # Conexión SQLAlchemy
+│       ├── models/                  # Tablas: merchant, transaction, insight
+│       ├── schemas/                 # Validación Pydantic de entrada/salida
+│       ├── routers/                 # Endpoints: merchants, transactions, insights, dashboard, clover
+│       └── services/
+│           ├── ai_service.py        # Motor de análisis con IA
+│           └── clover_service.py    # Integración con la API de Clover
+│
+├── frontend/                        # Dashboard web
+│   ├── index.html                   # App completa (HTML + CSS + JS)
+│   └── ARCHITECTURE.md              # Arquitectura del frontend
+│
+└── android/                         # App Android (Java)
+    ├── ARCHITECTURE.md              # Arquitectura del Android
+    └── app/src/main/java/com/smartreceipt/track/
+        ├── models/                  # Transaction, AIInsight, Dashboard
+        ├── network/                 # Retrofit + SmartReceiptApi
+        └── repositories/           # TransactionRepository, InsightRepository
 ```
 
 ---
 
-## Cómo correr el backend
+## Cómo correr
+
+### 1. Backend
 
 ```bash
 cd backend
 
-# 1. Instalar dependencias
+# Crear entorno virtual e instalar dependencias
+python3 -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# 2. Configurar variables de entorno
+# Configurar variables de entorno
 cp .env.example .env
 # Editar .env con tus credenciales de Clover
 
-# 3. Cargar datos de demo (opcional, para el hackathon)
+# Cargar datos de demo (2103 transacciones)
 python seed_demo.py
 
-# 4. Arrancar el servidor
+# Arrancar el servidor
 uvicorn main:app --reload
 ```
 
-El servidor queda disponible en `http://localhost:8000`.
-Documentación automática en `http://localhost:8000/docs`.
+Backend disponible en `http://localhost:8000`.
+Documentación interactiva en `http://localhost:8000/docs`.
+
+### 2. Frontend web
+
+```bash
+cd frontend
+python3 -m http.server 3000
+# Abrir http://localhost:3000
+```
+
+Requiere que el backend esté corriendo primero.
+
+### 3. App Android
+
+Abrir la carpeta `android/` en Android Studio. El emulador se conecta al backend usando la IP `10.0.2.2:8000` (que apunta al `localhost` de la PC).
 
 ---
 
@@ -86,24 +109,24 @@ Documentación automática en `http://localhost:8000/docs`.
 ```
 GET /api/dashboard/{merchant_id}?period_days=30
 ```
-Devuelve el resumen completo: revenue total, transacciones, ticket promedio, hora pico, top productos, métodos de pago y revenue diario.
+Devuelve revenue total, transacciones, ticket promedio, hora pico, top productos, métodos de pago y revenue diario.
 
 ### Insights de IA
 ```
 POST /api/insights/{merchant_id}/generate?period_days=30
 GET  /api/insights/{merchant_id}
 ```
-Genera y devuelve los 5 análisis automáticos:
+Genera y devuelve 5 análisis automáticos:
 - **peak_hours** — Hora del día con más ventas
 - **top_products** — Productos que más revenue generan
-- **average_ticket** — Ticket promedio y segmentación de clientes
+- **average_ticket** — Ticket promedio y segmentación
 - **best_day** — Día de la semana más rentable
 - **payment_methods** — Distribución de métodos de pago
 
 ### Transacciones
 ```
 POST /api/transactions/
-GET  /api/transactions/{merchant_id}
+GET  /api/transactions/{merchant_id}?limit=10&offset=0
 ```
 
 ### Comerciantes
@@ -116,32 +139,26 @@ GET  /api/merchants/{merchant_id}
 ```
 POST /api/clover/webhook
 ```
-Recibe eventos automáticos de Clover cuando se crea o actualiza una orden.
+Recibe eventos automáticos cuando se crea o actualiza una orden en el POS.
 
 ---
 
 ## Flujo de datos
 
 ```
-App Android  ──POST /api/transactions──▶  Backend
-                                              │
-                                         Guarda en DB
-                                              │
-             ──POST /api/insights/generate──▶ ai_service
-                                              │
-                                    Analiza transacciones
-                                              │
-             ◀──GET /api/dashboard────────── Devuelve insights
-```
-
-### Integración con Clover (producción)
-```
-Clover POS  ──webhook──▶  POST /api/clover/webhook
-                                    │
-                          clover_service llama a la API
-                          y obtiene detalles de la orden
-                                    │
-                          Guarda como Transaction en DB
+Clover POS ──webhook──▶ POST /api/clover/webhook
+                                  │
+                        clover_service obtiene
+                        detalle de la orden
+                                  │
+                        Guarda como Transaction
+                                  │
+              ◀── GET /api/dashboard ──── Frontend / Android
+                                  │
+                        ai_service analiza
+                        las transacciones
+                                  │
+              ◀── GET /api/insights ───── Insights de IA
 ```
 
 ---
@@ -150,12 +167,12 @@ Clover POS  ──webhook──▶  POST /api/clover/webhook
 
 | Variable | Descripción |
 |----------|-------------|
-| `DATABASE_URL` | URL de conexión a la DB (SQLite o PostgreSQL) |
+| `DATABASE_URL` | URL de la DB (`sqlite:///./smartreceipt.db` por defecto) |
 | `CLOVER_APP_ID` | ID de la app en el Clover App Market |
 | `CLOVER_APP_SECRET` | Secret para verificar webhooks |
-| `CLOVER_API_BASE_URL` | `https://apisandbox.dev.clover.com` (dev) o `https://api.clover.com` (prod) |
+| `CLOVER_API_BASE_URL` | `https://apisandbox.dev.clover.com` (dev) |
 | `SECRET_KEY` | Clave secreta de la aplicación |
-| `DEBUG` | `true` en desarrollo, `false` en producción |
+| `DEBUG` | `true` en desarrollo |
 
 ---
 

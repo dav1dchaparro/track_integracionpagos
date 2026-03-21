@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartReceipt — Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 32px;
+      background: #1a1d27;
+      border-bottom: 1px solid #2d3148;
+    }
+    .logo { font-size: 1.3rem; font-weight: 700; color: #6c63ff; letter-spacing: -0.5px; }
+    .logo span { color: #e2e8f0; }
+
+    .period-select {
+      background: #2d3148;
+      color: #e2e8f0;
+      border: 1px solid #3d4168;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    /* ── Layout ── */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .page-subtitle {
+      color: #7c85a8;
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+    }
+
+    /* ── KPI Cards ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .kpi-card {
+      background: #1a1d27;
+      border: 1px solid #2d3148;
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .kpi-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #7c85a8;
+      margin-bottom: 10px;
+    }
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .kpi-badge {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.78rem;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: rgba(108, 99, 255, 0.15);
+      color: #a89cff;
+    }
+    .kpi-badge.positive { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+    .kpi-badge.negative { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+
+    /* ── Two-col grid ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ── Panels ── */
+    .panel {
+      background: #1a1d27;
+      border: 1px solid #2d3148;
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #7c85a8;
+      margin-bottom: 16px;
+    }
+
+    /* ── Products list ── */
+    .product-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #2d3148;
+    }
+    .product-item:last-child { border-bottom: none; }
+    .product-rank {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #2d3148;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: #a89cff;
+    }
+    .product-name { flex: 1; font-size: 0.9rem; }
+    .product-qty { font-size: 0.8rem; color: #7c85a8; margin-right: 12px; }
+    .product-rev { font-size: 0.9rem; font-weight: 600; color: #34d399; }
+
+    /* ── Peak hour bar ── */
+    .peak-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 100%;
+      text-align: center;
+    }
+    .peak-hour-display {
+      font-size: 4rem;
+      font-weight: 800;
+      color: #6c63ff;
+      line-height: 1;
+    }
+    .peak-hour-label { font-size: 0.9rem; color: #7c85a8; }
+    .peak-revenue { font-size: 1.2rem; font-weight: 600; color: #34d399; margin-top: 4px; }
+
+    /* ── Transactions table ── */
+    .tx-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .tx-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #7c85a8;
+      border-bottom: 1px solid #2d3148;
+    }
+    .tx-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #1e2235;
+    }
+    .tx-table tr:last-child td { border-bottom: none; }
+    .tx-table tr:hover td { background: rgba(108, 99, 255, 0.05); }
+
+    .method-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      background: #2d3148;
+      color: #a89cff;
+    }
+
+    /* ── Loading / Error ── */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      color: #7c85a8;
+      font-size: 0.9rem;
+      gap: 10px;
+    }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid #2d3148;
+      border-top-color: #6c63ff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-box {
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      border-radius: 10px;
+      padding: 16px 20px;
+      color: #f87171;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    .insights-list { display: flex; flex-direction: column; gap: 10px; }
+    .insight-item {
+      background: #22263a;
+      border-left: 3px solid #6c63ff;
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+    .insight-type {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #a89cff;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Smart<span>Receipt</span></div>
+  <select class="period-select" id="periodSelect" onchange="loadAll()">
+    <option value="7">Últimos 7 días</option>
+    <option value="30" selected>Últimos 30 días</option>
+    <option value="90">Últimos 90 días</option>
+  </select>
+</header>
+
+<main>
+  <div class="page-title">Dashboard</div>
+  <div class="page-subtitle" id="merchantLabel">Cargando comerciante...</div>
+
+  <div id="errorBox" class="error-box" style="display:none"></div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid" id="kpiGrid">
+    <div class="loading"><div class="spinner"></div> Cargando datos...</div>
+  </div>
+
+  <!-- Productos + Hora pico -->
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title">Top Productos</div>
+      <div id="productsList"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Hora Pico</div>
+      <div id="peakHour"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+
+  <!-- Insights -->
+  <div class="panel" style="margin-bottom: 28px;">
+    <div class="panel-title">Insights IA</div>
+    <div id="insightsList"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+
+  <!-- Transacciones recientes -->
+  <div class="panel">
+    <div class="panel-title">Transacciones Recientes</div>
+    <div id="txTable"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+</main>
+
+<script>
+  const API = 'http://localhost:8000';
+  const MERCHANT = 'demo_merchant_001';
+
+  function period() {
+    return document.getElementById('periodSelect').value;
+  }
+
+  function fmt(n) {
+    return '$' + Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('errorBox');
+    box.textContent = '⚠ ' + msg;
+    box.style.display = 'block';
+  }
+
+  async function get(path) {
+    const res = await fetch(API + path);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  async function loadDashboard() {
+    const data = await get(`/api/dashboard/${MERCHANT}?period_days=${period()}`);
+
+    document.getElementById('merchantLabel').textContent =
+      `${data.merchant_id} · ${data.period.replace(/_/g,' ')}`;
+
+    const changeClass = data.revenue_change_percent >= 0 ? 'positive' : 'negative';
+    const changeSign  = data.revenue_change_percent >= 0 ? '+' : '';
+
+    document.getElementById('kpiGrid').innerHTML = `
+      <div class="kpi-card">
+        <div class="kpi-label">Ingresos totales</div>
+        <div class="kpi-value">${fmt(data.total_revenue)}</div>
+        <span class="kpi-badge ${changeClass}">${changeSign}${Number(data.revenue_change_percent).toFixed(1)}% vs período anterior</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Transacciones</div>
+        <div class="kpi-value">${data.total_transactions.toLocaleString()}</div>
+        <span class="kpi-badge">en ${period()} días</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Ticket promedio</div>
+        <div class="kpi-value">${fmt(data.average_ticket)}</div>
+        <span class="kpi-badge">por transacción</span>
+      </div>
+    `;
+
+    // Top productos
+    const products = (data.top_products || []).slice(0, 5);
+    document.getElementById('productsList').innerHTML = products.map((p, i) => `
+      <div class="product-item">
+        <div class="product-rank">${i + 1}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-qty">${p.quantity} uds.</div>
+        <div class="product-rev">${fmt(p.revenue)}</div>
+      </div>
+    `).join('');
+
+    // Hora pico
+    const h = data.top_hour;
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12  = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+    document.getElementById('peakHour').innerHTML = `
+      <div class="peak-box">
+        <div class="peak-hour-display">${h12}${ampm}</div>
+        <div class="peak-hour-label">Hora de mayor actividad</div>
+        <div class="peak-revenue">${fmt(data.top_hour_revenue)} en esa hora</div>
+      </div>
+    `;
+  }
+
+  async function loadInsights() {
+    const data = await get(`/api/insights/${MERCHANT}`);
+    const el = document.getElementById('insightsList');
+    if (!data.length) {
+      el.innerHTML = '<div style="color:#7c85a8;font-size:.9rem;padding:8px 0">No hay insights aún. Generá uno desde la API.</div>';
+      return;
+    }
+    el.innerHTML = '<div class="insights-list">' + data.slice(0, 4).map(ins => `
+      <div class="insight-item">
+        <div class="insight-type">${ins.insight_type.replace(/_/g,' ')}</div>
+        ${ins.description}
+      </div>
+    `).join('') + '</div>';
+  }
+
+  async function loadTransactions() {
+    const data = await get(`/api/transactions/${MERCHANT}?limit=10&offset=0`);
+    const el = document.getElementById('txTable');
+    if (!data.length) { el.innerHTML = '<div style="color:#7c85a8;padding:12px 0">Sin transacciones.</div>'; return; }
+
+    el.innerHTML = `
+      <table class="tx-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Descripción</th>
+            <th>Método</th>
+            <th style="text-align:right">Monto</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(tx => `
+            <tr>
+              <td>${new Date(tx.created_at).toLocaleDateString('es-AR', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
+              <td>${tx.description || '—'}</td>
+              <td><span class="method-badge">${tx.payment_method || '—'}</span></td>
+              <td style="text-align:right;font-weight:600;color:#34d399">${fmt(tx.amount)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  async function loadAll() {
+    document.getElementById('errorBox').style.display = 'none';
+    try {
+      await Promise.all([loadDashboard(), loadInsights(), loadTransactions()]);
+    } catch(e) {
+      showError('No se pudo conectar con el backend. Verificá que esté corriendo en localhost:8000. (' + e.message + ')');
+    }
+  }
+
+  loadAll();
+</script>
+</body>
+</html>
