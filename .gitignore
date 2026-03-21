@@ -7,4 +7,6 @@ dist/
 .env.local
 *.local
 env
-
+CloverIAMarketing/.idea/
+CloverIAMarketing/.gradle/
+CloverIAMarketing/.kotlin/
