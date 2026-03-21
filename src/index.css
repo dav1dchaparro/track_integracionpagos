@@ -2,9 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── SciFi Theme Variables ─────────────────────────────────── */
+:root {
+  --scifi-bg:               #060d08;
+  --scifi-surface:          #0a1a0c;
+  --scifi-card:             #0d1f12;
+  --scifi-card-hover:       #122516;
+  --scifi-border:           rgba(0, 230, 118, 0.12);
+  --scifi-border-hover:     rgba(0, 230, 118, 0.4);
+  --scifi-neon:             #00e676;
+  --scifi-neon-dim:         #00c853;
+  --scifi-neon-glow:        rgba(0, 230, 118, 0.15);
+  --scifi-neon-glow-strong: rgba(0, 230, 118, 0.35);
+  --scifi-text:             #e2f5e4;
+  --scifi-text-dim:         #8bab8e;
+  --scifi-text-muted:       #3d5e42;
+  --scifi-sidebar:          #080f0a;
+}
+
 @layer base {
   body {
-    @apply bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100;
+    background: var(--scifi-bg);
+    color: var(--scifi-text);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-feature-settings: "cv01", "cv03", "cv04", "ss01";
     -webkit-font-smoothing: antialiased;
@@ -17,23 +36,29 @@
   }
   h1, h2, h3 {
     letter-spacing: -0.022em;
+    color: var(--scifi-text);
   }
   h4, h5, h6 {
     letter-spacing: -0.014em;
+    color: var(--scifi-text);
   }
 }
 
 @layer components {
   /* ── Cards ────────────────────────────────────────────────── */
   .card {
-    @apply bg-white dark:bg-gray-900 rounded-xl shadow-sm
-           border border-gray-100 dark:border-gray-800
-           transition-all duration-200;
+    background: var(--scifi-card);
+    border: 1px solid var(--scifi-border);
+    border-radius: 0.75rem;
+    transition: all 0.2s;
   }
   .card-interactive {
-    @apply card cursor-pointer
-           hover:shadow-md hover:-translate-y-px
-           hover:border-green-200 dark:hover:border-green-800/60;
+    cursor: pointer;
+  }
+  .card-interactive:hover {
+    border-color: var(--scifi-border-hover);
+    box-shadow: 0 0 24px var(--scifi-neon-glow), 0 4px 20px rgba(0,0,0,0.6);
+    transform: translateY(-1px);
   }
 
   /* ── Buttons ──────────────────────────────────────────────── */
@@ -44,36 +69,57 @@
            active:scale-[0.975] disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-primary {
-    @apply btn bg-green-600 hover:bg-green-500
-           text-white focus-visible:ring-green-500
-           shadow-sm hover:shadow-green-sm;
+    @apply btn;
+    background: var(--scifi-neon);
+    color: #050d07;
+    font-weight: 700;
+    box-shadow: 0 0 12px var(--scifi-neon-glow);
+  }
+  .btn-primary:hover {
+    background: #19ffaa;
+    box-shadow: 0 0 24px var(--scifi-neon-glow-strong);
   }
   .btn-secondary {
-    @apply btn bg-white dark:bg-gray-800
-           border border-gray-200 dark:border-gray-700
-           text-gray-700 dark:text-gray-200
-           hover:border-gray-300 dark:hover:border-gray-600
-           hover:bg-gray-50 dark:hover:bg-gray-700/60
-           focus-visible:ring-gray-400;
+    @apply btn;
+    background: var(--scifi-surface);
+    border: 1px solid var(--scifi-border);
+    color: var(--scifi-text-dim);
+  }
+  .btn-secondary:hover {
+    border-color: var(--scifi-border-hover);
+    color: var(--scifi-text);
+    background: var(--scifi-card-hover);
   }
   .btn-ghost {
-    @apply btn text-gray-500 dark:text-gray-400
-           hover:bg-gray-100 dark:hover:bg-gray-800
-           hover:text-gray-800 dark:hover:text-gray-100;
+    @apply btn;
+    background: transparent;
+    color: var(--scifi-text-muted);
+  }
+  .btn-ghost:hover {
+    background: rgba(0, 230, 118, 0.07);
+    color: var(--scifi-text);
   }
 
   /* ── Tabs ─────────────────────────────────────────────────── */
   .tab-group {
-    @apply flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1 gap-0.5;
+    @apply flex items-center rounded-lg p-1 gap-0.5;
+    background: rgba(0, 230, 118, 0.05);
+    border: 1px solid var(--scifi-border);
   }
   .tab-item {
-    @apply px-3 py-1.5 rounded-md text-xs font-semibold
-           transition-all duration-150 text-gray-500 dark:text-gray-400
-           hover:text-gray-800 dark:hover:text-gray-200;
+    @apply px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-150;
+    color: var(--scifi-text-muted);
+  }
+  .tab-item:hover {
+    color: var(--scifi-text);
+    background: rgba(0, 230, 118, 0.06);
   }
   .tab-item-active {
-    @apply tab-item bg-white dark:bg-gray-700
-           text-green-600 dark:text-green-400 shadow-sm;
+    @apply tab-item;
+    background: var(--scifi-neon);
+    color: #050d07;
+    font-weight: 700;
+    box-shadow: 0 0 10px var(--scifi-neon-glow);
   }
 
   /* ── Badges ───────────────────────────────────────────────── */
@@ -81,17 +127,23 @@
     @apply inline-flex items-center px-2 py-0.5 rounded-md
            text-xs font-semibold tracking-tight;
   }
-  .badge-green  { @apply badge bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400; }
-  .badge-red    { @apply badge bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400; }
-  .badge-yellow { @apply badge bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400; }
+  .badge-green {
+    @apply badge;
+    background: rgba(0, 230, 118, 0.1);
+    color: var(--scifi-neon);
+    border: 1px solid rgba(0, 230, 118, 0.2);
+  }
+  .badge-red    { @apply badge; background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+  .badge-yellow { @apply badge; background: rgba(245,158,11,0.1); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
 
   /* ── Skeleton ─────────────────────────────────────────────── */
   .skeleton {
-    @apply rounded-lg bg-gray-200 dark:bg-gray-800;
+    @apply rounded-lg;
+    background: var(--scifi-surface);
     background-image: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(255,255,255,0.28) 50%,
+      rgba(0, 230, 118, 0.06) 50%,
       transparent 100%
     );
     background-size: 200% 100%;
@@ -100,43 +152,75 @@
 
   /* ── Dropdown ─────────────────────────────────────────────── */
   .dropdown-panel {
-    @apply absolute top-full left-0 mt-1.5 z-50
-           bg-white dark:bg-gray-900
-           border border-gray-200 dark:border-gray-700
-           rounded-xl shadow-xl overflow-hidden
-           animate-fade-in;
+    @apply absolute top-full left-0 mt-1.5 z-50 rounded-xl overflow-hidden animate-fade-in;
+    background: var(--scifi-card);
+    border: 1px solid var(--scifi-border);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 24px rgba(0,230,118,0.06);
   }
   .dropdown-item {
     @apply flex items-center justify-between w-full px-3.5 py-2.5
-           text-sm text-left
-           text-gray-700 dark:text-gray-300
-           hover:bg-gray-50 dark:hover:bg-gray-800
-           transition-colors duration-100;
+           text-sm text-left transition-colors duration-100;
+    color: var(--scifi-text-dim);
+  }
+  .dropdown-item:hover {
+    background: rgba(0, 230, 118, 0.06);
+    color: var(--scifi-text);
   }
   .dropdown-item-active {
-    @apply dropdown-item font-semibold text-green-600 dark:text-green-400;
+    @apply dropdown-item font-semibold;
+    color: var(--scifi-neon);
   }
 
   /* ── Input ────────────────────────────────────────────────── */
   .input-field {
-    @apply w-full px-3.5 py-2.5 rounded-lg border border-gray-200
-           bg-gray-50 dark:bg-gray-800/60 dark:border-gray-700
-           text-sm text-gray-900 dark:text-gray-100
-           placeholder:text-gray-400
-           focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-400
-           focus:bg-white dark:focus:bg-gray-800
-           transition-all duration-150;
+    @apply w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-all duration-150;
+    background: var(--scifi-surface);
+    border: 1px solid var(--scifi-border);
+    color: var(--scifi-text);
+  }
+  .input-field::placeholder { color: var(--scifi-text-muted); }
+  .input-field:focus {
+    border-color: var(--scifi-neon);
+    box-shadow: 0 0 0 2px rgba(0, 230, 118, 0.12);
   }
 }
 
 /* ── Dot grid background ────────────────────────────────────── */
 .bg-dot-pattern {
-  background-image: radial-gradient(circle, rgba(34,197,94,0.18) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(0,230,118,0.08) 1px, transparent 1px);
   background-size: 28px 28px;
+}
+
+/* ── Neon glow border ────────────────────────────────────────── */
+.neon-border {
+  border: 1px solid var(--scifi-border);
+  box-shadow: 0 0 12px var(--scifi-neon-glow), inset 0 0 12px rgba(0,230,118,0.02);
+}
+
+/* ── Recharts SciFi overrides ───────────────────────────────── */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(0, 230, 118, 0.07) !important;
+}
+.recharts-text,
+.recharts-cartesian-axis-tick-value {
+  fill: var(--scifi-text-muted) !important;
+}
+.recharts-default-tooltip {
+  background: var(--scifi-card) !important;
+  border: 1px solid var(--scifi-border) !important;
+  color: var(--scifi-text) !important;
+  border-radius: 8px !important;
+}
+.recharts-tooltip-label {
+  color: var(--scifi-text) !important;
+}
+.recharts-legend-item-text {
+  color: var(--scifi-text-dim) !important;
 }
 
 /* ── Scrollbar ──────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { @apply bg-gray-300 dark:bg-gray-700 rounded-full; }
-::-webkit-scrollbar-thumb:hover { @apply bg-gray-400 dark:bg-gray-600; }
+::-webkit-scrollbar-thumb { background: rgba(0,230,118,0.2); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,230,118,0.45); }

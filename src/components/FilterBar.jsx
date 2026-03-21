@@ -6,7 +6,7 @@ const CATEGORIES  = ['Todas', 'Electrónica', 'Ropa & Moda', 'Hogar', 'Deportes'
 const REGIONS     = ['Global', 'Américas', 'Europa', 'Asia-Pac', 'LATAM']
 
 // ─── Dropdown ────────────────────────────────────────────────────────────────
-function Dropdown({ label, options, value, onChange, icon: Icon }) {
+function Dropdown({ options, value, onChange, icon: Icon }) {
   const [open, setOpen] = useState(false)
   const ref = useRef()
 
@@ -24,11 +24,12 @@ function Dropdown({ label, options, value, onChange, icon: Icon }) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-sm font-semibold transition-all duration-200 ${
-          open || isFiltered
-            ? 'bg-brand-50 border-brand-300 text-brand-700 dark:bg-brand-900/20 dark:border-brand-700 dark:text-brand-400'
-            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-800 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600'
-        }`}
+        className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
+        style={{
+          background: open || isFiltered ? 'rgba(0,230,118,0.08)' : 'var(--scifi-surface)',
+          border: `1px solid ${open || isFiltered ? 'rgba(0,230,118,0.4)' : 'var(--scifi-border)'}`,
+          color: open || isFiltered ? 'var(--scifi-neon)' : 'var(--scifi-text-dim)',
+        }}
       >
         {Icon && <Icon className="w-3.5 h-3.5" />}
         <span>{value}</span>
@@ -36,7 +37,7 @@ function Dropdown({ label, options, value, onChange, icon: Icon }) {
           className={`w-3.5 h-3.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
         {isFiltered && (
-          <span className="w-1.5 h-1.5 rounded-full bg-brand-500 flex-shrink-0" />
+          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#00e676', boxShadow: '0 0 6px #00e676' }} />
         )}
       </button>
 
@@ -94,7 +95,6 @@ export default function FilterBar({
 
       {/* Category */}
       <Dropdown
-        label={category}
         options={CATEGORIES}
         value={category}
         onChange={setCategory}
@@ -103,7 +103,6 @@ export default function FilterBar({
 
       {/* Region */}
       <Dropdown
-        label={region}
         options={REGIONS}
         value={region}
         onChange={setRegion}
@@ -119,18 +118,14 @@ export default function FilterBar({
         className="btn-ghost p-2 rounded-xl"
         title="Actualizar datos"
       >
-        <RefreshCw className={`w-4 h-4 transition-transform ${isLoading ? 'animate-spin text-brand-600' : ''}`} />
+        <RefreshCw className={`w-4 h-4 transition-transform ${isLoading ? 'animate-spin' : ''}`} style={isLoading ? { color: '#00e676' } : {}} />
       </button>
 
       {/* Export */}
       <button
         onClick={handleExport}
         disabled={exporting}
-        className={`btn ${
-          exportDone
-            ? 'bg-brand-600 text-white border-brand-600'
-            : 'btn-primary'
-        }`}
+        className="btn-primary"
       >
         {exporting ? (
           <>
