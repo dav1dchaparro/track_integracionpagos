@@ -16,3 +16,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     password: Mapped[str] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    # Clover integration
+    clover_merchant_id: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True, index=True)
+    clover_access_token: Mapped[str | None] = mapped_column(String(512), nullable=True)

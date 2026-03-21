@@ -8,6 +8,11 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
 
+    # Clover integration
+    clover_api_base: str = "https://apisandbox.dev.clover.com"
+    clover_app_id: str = ""
+    clover_app_secret: str = ""
+
     model_config = ConfigDict(env_file=".env", extra="ignore")
 
 

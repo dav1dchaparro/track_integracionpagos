@@ -114,6 +114,44 @@ def summary(
         for k, v in sorted(cat_revenue.items(), key=lambda x: -x[1])
     ]
 
+    # Peak hour analysis
+    hour_data = defaultdict(lambda: {"revenue": 0, "count": 0})
+    for s in sales:
+        h = s.sold_at.hour
+        hour_data[h]["revenue"] += float(s.total)
+        hour_data[h]["count"] += 1
+
+    peak_hour = None
+    if hour_data:
+        top_h = max(hour_data, key=lambda h: hour_data[h]["revenue"])
+        peak_hour = {
+            "hour": top_h,
+            "label": f"{top_h}:00",
+            "revenue": round(hour_data[top_h]["revenue"], 2),
+            "count": hour_data[top_h]["count"],
+        }
+
+    # Revenue change vs previous period
+    if days == 0:
+        prev_since = since - timedelta(days=1)
+        prev_until = since
+    else:
+        prev_since = since - timedelta(days=days)
+        prev_until = since
+
+    prev_sales = db.execute(
+        select(Sale).where(
+            Sale.user_id == user.id,
+            Sale.sold_at >= prev_since,
+            Sale.sold_at < prev_until,
+        )
+    ).unique().scalars().all()
+    prev_revenue = sum(float(s.total) for s in prev_sales)
+    revenue_change_percent = (
+        round(((total_revenue - prev_revenue) / prev_revenue) * 100, 2)
+        if prev_revenue > 0 else 0.0
+    )
+
     # Counts
     total_products = db.execute(
         select(func.count()).select_from(Product).where(Product.user_id == user.id)
@@ -142,4 +180,6 @@ def summary(
         "sales_timeline": sales_timeline,
         "top_products": top_products,
         "category_breakdown": category_breakdown,
+        "peak_hour": peak_hour,
+        "revenue_change_percent": revenue_change_percent,
     }
