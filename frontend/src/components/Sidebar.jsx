@@ -65,16 +65,14 @@ export default function Sidebar({ open, onClose }) {
           style={{ borderBottom: '1px solid var(--scifi-border)' }}
         >
           <div className="flex items-center gap-3">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+            <img
+              src="/logo.png"
+              alt="Atlas Nexus"
+              className="w-8 h-8 rounded-lg flex-shrink-0 object-contain"
               style={{
-                background: 'rgba(0,230,118,0.12)',
-                border: '1px solid rgba(0,230,118,0.3)',
-                boxShadow: '0 0 12px rgba(0,230,118,0.2)',
+                filter: 'drop-shadow(0 0 8px rgba(0,255,80,0.4))',
               }}
-            >
-              <TrendingUp className="w-4 h-4" style={{ color: '#00e676' }} strokeWidth={2.5} />
-            </div>
+            />
             <div>
               <p className="font-bold text-sm leading-none tracking-tight" style={{ color: 'var(--scifi-text)' }}>
                 Atlas Nexus

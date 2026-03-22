@@ -88,7 +88,7 @@ fun LoginScreen(
                 // ── Logo / Título ───────────────────────────────
                 Text(text = "📊", fontSize = 48.sp)
                 Text(
-                    text = "CloverIA Marketing",
+                    text = "ATLAS NEXUS",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = textColor

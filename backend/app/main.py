@@ -16,7 +16,7 @@ async def lifespan(app: FastAPI):
     database.cleanup()
 
 
-app = FastAPI(title="Sales Feedback API", lifespan=lifespan)
+app = FastAPI(title="Atlas Nexus API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

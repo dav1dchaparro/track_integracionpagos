@@ -68,7 +68,7 @@ fun DashboardScreen(
                 title = {
                     val title = when (uiState) {
                         is DashboardUiState.Success -> "📊 ${uiState.storeName}"
-                        else -> "📊 CloverIA Marketing"
+                        else -> "📊 Atlas Nexus"
                     }
                     Text(text = title, color = textColor, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 },

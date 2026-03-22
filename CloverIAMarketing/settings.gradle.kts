@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CloverIAMarketing"
+rootProject.name = "AtlasNexus"
 include(":app")

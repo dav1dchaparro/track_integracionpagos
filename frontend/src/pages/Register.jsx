@@ -153,9 +153,7 @@ export default function Register() {
                 className="w-10 h-10 flex items-center justify-center"
                 style={{ filter: 'drop-shadow(0 0 8px rgba(0,255,80,0.6))' }}
               >
-                <svg width="32" height="28" viewBox="0 0 260 225" fill="none">
-                  <path fillRule="evenodd" d="M115,40 Q130,5 145,40 L225,172 Q255,220 200,220 L60,220 Q5,220 35,172 Z M130,88 L186,180 L74,180 Z" fill="#00e850"/>
-                </svg>
+                <img src="/logo.png" alt="Atlas Nexus" className="w-8 h-8 object-contain" />
               </div>
               <div>
                 <p className="font-bold text-white text-sm tracking-wide leading-none">ATLAS NEXUS</p>

@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.rememberNavController
 import com.cloveriamarketing.data.remote.RetrofitClient
 import com.cloveriamarketing.navigation.NavGraph
-import com.cloveriamarketing.ui.theme.CloverIAMarketingTheme
+import com.cloveriamarketing.ui.theme.AtlasNexusTheme
 
 /**
  * MainActivity — punto de entrada de la app Android.
@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
 
         // ── Paso 2: Arrancar la UI ──────────────────────────────
         setContent {
-            CloverIAMarketingTheme {
+            AtlasNexusTheme {
                 val navController = rememberNavController()
                 NavGraph(navController = navController)
             }

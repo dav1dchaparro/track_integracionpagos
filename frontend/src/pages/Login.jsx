@@ -65,28 +65,9 @@ export default function Login() {
 
         {/* Brand: ATLAS NEXUS */}
         <div className="mb-12 flex flex-col items-center">
-          {/* Penrose impossible triangle — neon logo */}
+          {/* Logo */}
           <div className="mb-6" style={{ filter: 'drop-shadow(0 0 18px rgba(0,255,80,0.7)) drop-shadow(0 0 50px rgba(0,255,80,0.3)) drop-shadow(0 0 100px rgba(0,255,80,0.1))' }}>
-            <svg width="120" height="105" viewBox="0 0 260 225" fill="none">
-              <defs>
-                <clipPath id="pRing">
-                  <path fillRule="evenodd" clipRule="evenodd" d="M115,40 Q130,5 145,40 L225,172 Q255,220 200,220 L60,220 Q5,220 35,172 Z M130,88 L186,180 L74,180 Z"/>
-                </clipPath>
-              </defs>
-              {/* Thick ring: outer rounded triangle – inner triangle hole */}
-              <path fillRule="evenodd" d="M115,40 Q130,5 145,40 L225,172 Q255,220 200,220 L60,220 Q5,220 35,172 Z M130,88 L186,180 L74,180 Z" fill="#00e850"/>
-              {/* Face shading + Penrose seam lines (clipped to ring) */}
-              <g clipPath="url(#pRing)">
-                {/* Left face — darkest */}
-                <path d="M130,0 L0,225 L130,88 L186,180 Z" fill="rgba(0,0,0,0.14)"/>
-                {/* Right face — medium */}
-                <path d="M260,225 L130,0 L186,180 L74,180 Z" fill="rgba(0,0,0,0.07)"/>
-                {/* Penrose seam lines — impossible crossover illusion */}
-                <line x1="136" y1="28" x2="186" y2="180" stroke="rgba(0,30,10,0.35)" strokeWidth="2.5"/>
-                <line x1="28" y1="204" x2="130" y2="88" stroke="rgba(0,30,10,0.35)" strokeWidth="2.5"/>
-                <line x1="232" y1="204" x2="74" y2="180" stroke="rgba(0,30,10,0.35)" strokeWidth="2.5"/>
-              </g>
-            </svg>
+            <img src="/logo.png" alt="Atlas Nexus" className="w-28 h-28 object-contain" />
           </div>
           <h1
             className="text-4xl font-bold tracking-[0.25em] text-white"
