@@ -4,8 +4,6 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import Sidebar from './components/Sidebar'
 import Header from './components/Header'
 import Dashboard from './pages/Dashboard'
-import Analytics from './pages/Analytics'
-import Reports from './pages/Reports'
 import Settings from './pages/Settings'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -13,7 +11,6 @@ import SellerDashboard from './pages/SellerDashboard'
 import UserManagement from './pages/UserManagement'
 import PurchasePatterns from './pages/PurchasePatterns'
 import Insights from './pages/Insights'
-import Marketing from './pages/Marketing'
 import Categories from './pages/Categories'
 import Products from './pages/Products'
 
@@ -55,22 +52,6 @@ function AppInner() {
 
               {/* Owner-only routes */}
               <Route
-                path="/analytics"
-                element={
-                  user.role === 'owner' || perms?.analytics
-                    ? <Analytics />
-                    : <Navigate to="/" replace />
-                }
-              />
-              <Route
-                path="/reports"
-                element={
-                  user.role === 'owner' || perms?.reports
-                    ? <Reports />
-                    : <Navigate to="/" replace />
-                }
-              />
-              <Route
                 path="/users"
                 element={user.role === 'owner' ? <UserManagement /> : <Navigate to="/" replace />}
               />
@@ -81,10 +62,6 @@ function AppInner() {
               <Route
                 path="/insights"
                 element={user.role === 'owner' ? <Insights /> : <Navigate to="/" replace />}
-              />
-              <Route
-                path="/marketing"
-                element={user.role === 'owner' ? <Marketing /> : <Navigate to="/" replace />}
               />
 
               <Route path="/categories" element={<Categories />} />

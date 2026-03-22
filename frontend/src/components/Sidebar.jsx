@@ -1,19 +1,16 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, BarChart3, FileText, Settings, Users,
+  LayoutDashboard, Settings, Users,
   TrendingUp, X, Search, ChevronRight, Crown, LogOut, ShoppingCart,
-  Tag, Package, Sparkles, Megaphone,
+  Tag, Package, Sparkles,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const OWNER_NAV = [
   { to: '/',                   icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/analytics',          icon: BarChart3,       label: 'Analytics',         badge: 'IA'  },
   { to: '/insights',           icon: Sparkles,        label: 'Insights',          badge: 'new' },
-  { to: '/marketing',          icon: Megaphone,       label: 'Marketing',         badge: 'IA'  },
   { to: '/purchase-patterns',  icon: ShoppingCart,    label: 'Pat. de Compra' },
-  { to: '/reports',            icon: FileText,        label: 'Reportes',          badge: '3'   },
   { to: '/categories',          icon: Tag,             label: 'Categorias' },
   { to: '/products',            icon: Package,         label: 'Productos' },
   { to: '/users',              icon: Users,           label: 'Equipo' },
@@ -25,15 +22,11 @@ const SELLER_BASE_NAV = [
 ]
 
 const SELLER_OPTIONAL_NAV = [
-  { to: '/reports',   icon: FileText,  label: 'Reportes',       perm: 'reports'   },
-  { to: '/analytics', icon: BarChart3, label: 'Analytics',      perm: 'analytics' },
   { to: '/settings',  icon: Settings,  label: 'Configuración',  perm: null        },
 ]
 
 const BADGE_COLORS = {
-  IA:  'bg-purple-500/20 text-purple-300 border border-purple-500/30',
   new: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
-  '3': 'bg-neon/10 text-neon border border-neon/20',
 }
 
 export default function Sidebar({ open, onClose }) {

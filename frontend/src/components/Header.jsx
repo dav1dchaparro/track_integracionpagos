@@ -84,7 +84,7 @@ export default function Header({ darkMode, onToggleDark, onToggleSidebar }) {
             <Search className="w-4 h-4 flex-shrink-0" style={{ color: searchFocus ? '#00e676' : 'var(--scifi-text-muted)' }} />
             <input
               type="text"
-              placeholder={user?.role === 'owner' ? 'Buscar métricas, reportes...' : 'Buscar órdenes...'}
+              placeholder={user?.role === 'owner' ? 'Buscar métricas...' : 'Buscar órdenes...'}
               onFocus={() => setSearchFocus(true)}
               onBlur={() => setSearchFocus(false)}
               className="bg-transparent text-sm outline-none w-full"
