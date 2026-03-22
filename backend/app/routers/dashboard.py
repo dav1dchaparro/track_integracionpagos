@@ -37,7 +37,7 @@ def summary(
         since = now - timedelta(days=days)
 
     # KPIs
-    sales_query = select(Sale).where(Sale.business_id == user.business_id, Sale.sold_at >= since)
+    sales_query = select(Sale).where(Sale.user_id == user.id, Sale.sold_at >= since)
     sales = db.execute(sales_query).unique().scalars().all()
 
     total_revenue = sum(float(s.total) for s in sales)
@@ -106,7 +106,7 @@ def summary(
             func.sum(SaleItem.quantity).label("units"),
         )
         .join(Sale, Sale.id == SaleItem.sale_id)
-        .where(Sale.business_id == user.business_id, Sale.sold_at >= since)
+        .where(Sale.user_id == user.id, Sale.sold_at >= since)
         .group_by(SaleItem.product_id)
         .order_by(func.sum(SaleItem.subtotal).desc())
         .limit(10)
@@ -145,10 +145,10 @@ def summary(
 
     # Counts
     total_products = db.execute(
-        select(func.count()).select_from(Product).where(Product.business_id == user.business_id)
+        select(func.count()).select_from(Product).where(Product.user_id == user.id)
     ).scalar()
     total_categories = db.execute(
-        select(func.count()).select_from(Category).where(Category.business_id == user.business_id)
+        select(func.count()).select_from(Category).where(Category.user_id == user.id)
     ).scalar()
 
     # Customer metrics

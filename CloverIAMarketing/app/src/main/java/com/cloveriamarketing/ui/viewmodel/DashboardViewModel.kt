@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cloveriamarketing.data.remote.*
+import com.cloveriamarketing.data.remote.RetrofitClient
 import com.cloveriamarketing.data.repository.AuthRepository
 import com.cloveriamarketing.data.repository.DashboardRepository
 import kotlinx.coroutines.launch
@@ -37,7 +38,10 @@ sealed class DashboardUiState {
     data class Success(
         val storeName: String,
         val dashboard: DashboardDto,
-        val recentSales: List<SaleDto>
+        val recentSales: List<SaleDto>,
+        val briefing: String? = null,
+        val alerts: List<AlertDto> = emptyList(),
+        val monthlyGoal: Double? = null
     ) : DashboardUiState()
     data class Error(val message: String) : DashboardUiState()
 }
@@ -69,10 +73,8 @@ class DashboardViewModel : ViewModel() {
         viewModelScope.launch {
             uiState = DashboardUiState.Loading
 
-            // Obtener nombre de tienda desde almacenamiento local
             val storeName = authRepo.getStoreName()
 
-            // Llamada al dashboard
             val dashboardResult = dashboardRepo.getDashboardSummary(period)
 
             if (dashboardResult.isFailure) {
@@ -82,16 +84,28 @@ class DashboardViewModel : ViewModel() {
                 return@launch
             }
 
-            // Llamada a ventas recientes
             val salesResult = dashboardRepo.getRecentSales(limit = 20)
+            val briefingResult = dashboardRepo.getBriefing()
+            val alertsResult = dashboardRepo.getAlerts()
 
             val dashboard = dashboardResult.getOrThrow()
             val sales = salesResult.getOrDefault(emptyList())
+            val briefing = briefingResult.getOrNull()?.briefing
+            val alerts = alertsResult.getOrNull()?.alerts ?: emptyList()
+
+            // Get monthly goal from user data
+            val userResult = try {
+                RetrofitClient.getApi().getCurrentUser()
+            } catch (e: Exception) { null }
+            val monthlyGoal = userResult?.body()?.monthlyGoal
 
             uiState = DashboardUiState.Success(
                 storeName = storeName,
                 dashboard = dashboard,
-                recentSales = sales
+                recentSales = sales,
+                briefing = briefing,
+                alerts = alerts,
+                monthlyGoal = monthlyGoal
             )
         }
     }

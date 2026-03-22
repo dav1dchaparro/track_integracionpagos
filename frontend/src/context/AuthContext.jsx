@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
       return
     }
     apiFetch('/auth/me')
-      .then(u => setUser({ ...u, role: u.rol === 'admin' ? 'owner' : 'seller', initials: u.store_name.slice(0, 2).toUpperCase() }))
+      .then(u => setUser({ ...u, role: 'owner', initials: u.store_name.slice(0, 2).toUpperCase() }))
       .catch(() => {
         localStorage.removeItem('auth_token')
       })
@@ -56,7 +56,7 @@ export function AuthProvider({ children }) {
       })
       localStorage.setItem('auth_token', data.access_token)
       const me = await apiFetch('/auth/me')
-      setUser({ ...me, role: me.rol === 'admin' ? 'owner' : 'seller', initials: me.store_name.slice(0, 2).toUpperCase() })
+      setUser({ ...me, role: 'owner', initials: me.store_name.slice(0, 2).toUpperCase() })
       return { success: true }
     } catch (err) {
       return { error: err.message }

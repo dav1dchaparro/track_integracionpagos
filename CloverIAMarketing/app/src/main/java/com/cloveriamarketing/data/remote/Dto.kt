@@ -45,6 +45,8 @@ data class UserDto(
     val id: String,
     @SerializedName("store_name") val storeName: String,
     val email: String,
+    val rol: String? = null,
+    @SerializedName("monthly_goal") val monthlyGoal: Double? = null,
     @SerializedName("created_at") val createdAt: String
 )
 
@@ -56,11 +58,13 @@ data class UserDto(
 data class DashboardDto(
     val period: String,
     val kpis: KpisDto,
+    @SerializedName("kpi_changes") val kpiChanges: KpiChangesDto? = null,
     @SerializedName("payment_methods") val paymentMethods: Map<String, PaymentMethodDetail>,
     @SerializedName("card_brands") val cardBrands: Map<String, CardBrandDetail>,
     @SerializedName("sales_timeline") val salesTimeline: List<TimelinePoint>,
     @SerializedName("top_products") val topProducts: List<TopProductDto>,
-    @SerializedName("category_breakdown") val categoryBreakdown: List<CategoryBreakdownDto>
+    @SerializedName("category_breakdown") val categoryBreakdown: List<CategoryBreakdownDto>,
+    @SerializedName("top_customers") val topCustomers: List<TopCustomerDto>? = null
 )
 
 data class KpisDto(
@@ -68,7 +72,9 @@ data class KpisDto(
     @SerializedName("total_orders") val totalOrders: Int,
     @SerializedName("avg_ticket") val avgTicket: Double,
     @SerializedName("total_products") val totalProducts: Int,
-    @SerializedName("total_categories") val totalCategories: Int
+    @SerializedName("total_categories") val totalCategories: Int,
+    @SerializedName("unique_customers") val uniqueCustomers: Int? = 0,
+    @SerializedName("return_rate") val returnRate: Double? = 0.0
 )
 
 data class PaymentMethodDetail(
@@ -96,6 +102,37 @@ data class TopProductDto(
 data class CategoryBreakdownDto(
     val name: String,
     val revenue: Double
+)
+
+data class KpiChangesDto(
+    @SerializedName("total_revenue") val totalRevenue: Double? = null,
+    @SerializedName("total_orders") val totalOrders: Double? = null,
+    @SerializedName("avg_ticket") val avgTicket: Double? = null
+)
+
+data class TopCustomerDto(
+    val email: String,
+    val orders: Int,
+    val total: Double
+)
+
+// ═══════════════════════════════════════════════════════════
+//  INSIGHTS — Briefing y Alertas
+// ═══════════════════════════════════════════════════════════
+
+data class BriefingResponse(
+    val briefing: String
+)
+
+data class AlertsResponse(
+    val alerts: List<AlertDto>
+)
+
+data class AlertDto(
+    val type: String,
+    val level: String,
+    val title: String,
+    val message: String
 )
 
 // ═══════════════════════════════════════════════════════════

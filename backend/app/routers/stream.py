@@ -34,16 +34,16 @@ async def stream_sales(
     db: Session = Depends(get_db),
 ):
     user = _get_user_from_token(token, db)
-    business_id = str(user.business_id)
+    uid = str(user.id)
 
     async def event_generator():
-        queue = await event_manager.subscribe(business_id)
+        queue = await event_manager.subscribe(uid)
         try:
             while True:
                 data = await queue.get()
                 yield {"event": "new_sale", "data": data}
         except asyncio.CancelledError:
-            event_manager.unsubscribe(business_id, queue)
+            event_manager.unsubscribe(uid, queue)
             raise
 
     return EventSourceResponse(event_generator())

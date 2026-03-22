@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Eye, EyeOff, Mail, Lock, User, Building2, Phone,
-  AlertCircle, CheckCircle, ArrowLeft, Shield,
+  AlertCircle, CheckCircle, ArrowLeft,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
@@ -162,27 +162,17 @@ export default function Register() {
                 <p className="text-[10px] mt-0.5 text-[#00d2b4]/50">Registro de nueva cuenta</p>
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-white mb-1">Crear cuenta</h1>
+            <h1 className="text-2xl font-bold text-white mb-1">Registra tu negocio</h1>
             <p className="text-sm text-white/40">
-              Te registrarás como <strong className="text-[#00d2b4]">Vendedor</strong>. El dueño podrá gestionar tus permisos.
-            </p>
-          </div>
-
-          {/* Role notice */}
-          <div className="mx-8 mt-6 flex items-center gap-3 px-4 py-3 rounded-xl"
-            style={{ background: 'rgba(0,210,180,0.06)', border: '1px solid rgba(0,210,180,0.12)' }}
-          >
-            <Shield className="w-5 h-5 text-[#00d2b4]/60 flex-shrink-0" />
-            <p className="text-xs text-white/50 leading-snug">
-              Las cuentas de <strong className="text-white/70">Dueño</strong> son configuradas directamente por el administrador del sistema.
+              Crea tu cuenta y conecta tu comercio a <strong className="text-[#00d2b4]">Atlas Nexus</strong> para empezar a crecer con datos inteligentes.
             </p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="px-8 py-6 space-y-4">
-            <Field label="Nombre completo" icon={User} required>
+            <Field label="Nombre del negocio" icon={Building2} required>
               <input type="text" value={form.name} onChange={e => set('name', e.target.value)}
-                placeholder="Ej: Laura Sánchez" required className={inputClass} style={inputStyle} {...focusHandlers} />
+                placeholder="Ej: Café Don Pedro" required className={inputClass} style={inputStyle} {...focusHandlers} />
             </Field>
 
             <Field label="Email" icon={Mail} required>

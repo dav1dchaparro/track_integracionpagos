@@ -78,4 +78,32 @@ class DashboardRepository {
             Result.failure(Exception("Sin conexión: ${e.message}"))
         }
     }
+
+    /** Obtiene el briefing diario generado por IA */
+    suspend fun getBriefing(): Result<BriefingResponse> {
+        return try {
+            val response = api.getBriefing()
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("No se pudo cargar el briefing"))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("Sin conexión: ${e.message}"))
+        }
+    }
+
+    /** Obtiene alertas inteligentes del negocio */
+    suspend fun getAlerts(): Result<AlertsResponse> {
+        return try {
+            val response = api.getAlerts()
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("No se pudieron cargar las alertas"))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("Sin conexión: ${e.message}"))
+        }
+    }
 }

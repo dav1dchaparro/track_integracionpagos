@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cloveriamarketing.data.remote.AlertDto
 import com.cloveriamarketing.data.remote.DashboardDto
 import com.cloveriamarketing.data.remote.SaleDto
 import com.cloveriamarketing.ui.viewmodel.DashboardUiState
@@ -154,7 +155,10 @@ fun DashboardScreen(
                     textColor = textColor,
                     subtextColor = subtextColor,
                     accentColor = accentColor,
-                    greenColor = greenColor
+                    greenColor = greenColor,
+                    briefing = uiState.briefing,
+                    alerts = uiState.alerts,
+                    monthlyGoal = uiState.monthlyGoal
                 )
             }
         }
@@ -176,18 +180,178 @@ private fun DashboardContent(
     textColor: Color,
     subtextColor: Color,
     accentColor: Color,
-    greenColor: Color
+    greenColor: Color,
+    briefing: String? = null,
+    alerts: List<AlertDto> = emptyList(),
+    monthlyGoal: Double? = null
 ) {
     val kpis = dashboard.kpis
+    val changes = dashboard.kpiChanges
+    val warnColor = Color(0xFFF59E0B)
+    val dangerColor = Color(0xFFEF4444)
+    val infoColor = Color(0xFF3B82F6)
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = PaddingValues(vertical = 16.dp)
     ) {
+
+        // ── Alertas inteligentes ──────────────────────────────────
+        if (alerts.isNotEmpty()) {
+            items(alerts.size) { idx ->
+                val alert = alerts[idx]
+                val (bgColor, dotColor) = when (alert.level) {
+                    "success" -> Pair(greenColor.copy(alpha = 0.1f), greenColor)
+                    "warning" -> Pair(warnColor.copy(alpha = 0.1f), warnColor)
+                    "info" -> Pair(infoColor.copy(alpha = 0.1f), infoColor)
+                    else -> Pair(subtextColor.copy(alpha = 0.1f), subtextColor)
+                }
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = bgColor)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.Top,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .padding(top = 4.dp)
+                                .size(8.dp)
+                                .background(dotColor, RoundedCornerShape(4.dp))
+                        )
+                        Column {
+                            Text(
+                                text = alert.title,
+                                color = dotColor,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = alert.message,
+                                color = textColor.copy(alpha = 0.8f),
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── Briefing del día ──────────────────────────────────────
+        if (!briefing.isNullOrBlank()) {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = cardBg)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text("🤖", fontSize = 18.sp)
+                            Text(
+                                "Briefing del día",
+                                color = greenColor,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                "IA · Groq",
+                                color = subtextColor.copy(alpha = 0.5f),
+                                fontSize = 10.sp
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = briefing,
+                            color = textColor.copy(alpha = 0.9f),
+                            fontSize = 13.sp,
+                            lineHeight = 20.sp
+                        )
+                    }
+                }
+            }
+        }
+
+        // ── Meta mensual ──────────────────────────────────────────
+        if (monthlyGoal != null && monthlyGoal > 0) {
+            item {
+                val pct = (kpis.totalRevenue / monthlyGoal).coerceAtMost(1.0)
+                val pctText = "${(pct * 100).toInt()}%"
+                val barColor = when {
+                    pct >= 1.0 -> greenColor
+                    pct >= 0.75 -> warnColor
+                    else -> accentColor
+                }
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = cardBg)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("🎯 Meta mensual", color = subtextColor, fontSize = 12.sp)
+                            Text(
+                                text = pctText,
+                                color = barColor,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .background(
+                                    color = subtextColor.copy(alpha = 0.15f),
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(pct.toFloat())
+                                    .height(8.dp)
+                                    .background(
+                                        color = barColor,
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                "$${String.format("%.0f", kpis.totalRevenue)}",
+                                color = subtextColor,
+                                fontSize = 11.sp
+                            )
+                            Text(
+                                "$${String.format("%.0f", monthlyGoal)}",
+                                color = textColor,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         // ── Selector de período ─────────────────────────────────
         item {
@@ -211,7 +375,7 @@ private fun DashboardContent(
             }
         }
 
-        // ── KPIs principales ────────────────────────────────────
+        // ── KPIs principales (con % cambio) ──────────────────────
         item {
             Text("Resumen del período", color = subtextColor, fontSize = 13.sp, fontWeight = FontWeight.Medium)
         }
@@ -221,32 +385,77 @@ private fun DashboardContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                StatCard(
+                KpiCardWithChange(
                     modifier = Modifier.weight(1f),
                     label = "Ingresos",
                     value = "$${String.format("%.0f", kpis.totalRevenue)}",
                     icon = "💰",
+                    change = changes?.totalRevenue,
                     cardBg = cardBg,
                     textColor = textColor,
-                    valueColor = greenColor
+                    valueColor = greenColor,
+                    greenColor = greenColor,
+                    dangerColor = dangerColor
                 )
-                StatCard(
+                KpiCardWithChange(
                     modifier = Modifier.weight(1f),
                     label = "Ventas",
                     value = "${kpis.totalOrders}",
                     icon = "🛒",
+                    change = changes?.totalOrders,
                     cardBg = cardBg,
                     textColor = textColor,
-                    valueColor = accentColor
+                    valueColor = accentColor,
+                    greenColor = greenColor,
+                    dangerColor = dangerColor
+                )
+                KpiCardWithChange(
+                    modifier = Modifier.weight(1f),
+                    label = "Ticket",
+                    value = "$${String.format("%.0f", kpis.avgTicket)}",
+                    icon = "🎫",
+                    change = changes?.avgTicket,
+                    cardBg = cardBg,
+                    textColor = textColor,
+                    valueColor = warnColor,
+                    greenColor = greenColor,
+                    dangerColor = dangerColor
+                )
+            }
+        }
+
+        // ── KPIs de clientes ──────────────────────────────────────
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    label = "Clientes",
+                    value = "${kpis.uniqueCustomers ?: 0}",
+                    icon = "👥",
+                    cardBg = cardBg,
+                    textColor = textColor,
+                    valueColor = Color(0xFFEC4899)
                 )
                 StatCard(
                     modifier = Modifier.weight(1f),
-                    label = "Ticket prom.",
-                    value = "$${String.format("%.2f", kpis.avgTicket)}",
-                    icon = "🎫",
+                    label = "Retorno",
+                    value = "${kpis.returnRate ?: 0}%",
+                    icon = "🔄",
                     cardBg = cardBg,
                     textColor = textColor,
-                    valueColor = Color(0xFFF59E0B)
+                    valueColor = warnColor
+                )
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    label = "Productos",
+                    value = "${kpis.totalProducts}",
+                    icon = "📦",
+                    cardBg = cardBg,
+                    textColor = textColor,
+                    valueColor = infoColor
                 )
             }
         }
@@ -386,6 +595,52 @@ fun StatCard(
             Text(text = icon, fontSize = 24.sp)
             Text(text = value, color = valueColor, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Text(text = label, color = textColor.copy(alpha = 0.7f), fontSize = 11.sp)
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Componente: Tarjeta KPI con % de cambio
+// ═══════════════════════════════════════════════════════════════
+
+@Composable
+fun KpiCardWithChange(
+    modifier: Modifier = Modifier,
+    label: String,
+    value: String,
+    icon: String,
+    change: Double?,
+    cardBg: Color,
+    textColor: Color,
+    valueColor: Color,
+    greenColor: Color,
+    dangerColor: Color
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = cardBg)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(text = icon, fontSize = 24.sp)
+            Text(text = value, color = valueColor, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(text = label, color = textColor.copy(alpha = 0.7f), fontSize = 11.sp)
+            if (change != null) {
+                val arrow = if (change >= 0) "↑" else "↓"
+                val color = if (change >= 0) greenColor else dangerColor
+                Text(
+                    text = "$arrow ${String.format("%.1f", kotlin.math.abs(change))}%",
+                    color = color,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

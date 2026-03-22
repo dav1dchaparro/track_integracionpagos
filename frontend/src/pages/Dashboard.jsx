@@ -5,7 +5,7 @@ import {
 } from 'recharts'
 import {
   DollarSign, ShoppingCart, TrendingUp, Package, Tag,
-  CreditCard, RefreshCw, Users, RotateCcw,
+  CreditCard, RefreshCw, Users, RotateCcw, Cloud,
 } from 'lucide-react'
 import ChartCard from '../components/ChartCard'
 import { apiFetch } from '../context/AuthContext'
@@ -52,6 +52,23 @@ export default function Dashboard() {
   const [goalInput, setGoalInput] = useState('')
   const [editingGoal, setEditingGoal] = useState(false)
   const [savingGoal, setSavingGoal] = useState(false)
+  const [syncing, setSyncing] = useState(false)
+  const [syncResult, setSyncResult] = useState(null)
+
+  const handleCloverSync = async () => {
+    setSyncing(true)
+    setSyncResult(null)
+    try {
+      const result = await apiFetch('/clover/sync', { method: 'POST' })
+      setSyncResult(result)
+      if (result.saved > 0) fetchDashboard()
+      setTimeout(() => setSyncResult(null), 4000)
+    } catch (err) {
+      setSyncResult({ error: err.message })
+      setTimeout(() => setSyncResult(null), 4000)
+    }
+    setSyncing(false)
+  }
 
   const fetchDashboard = async (p) => {
     setLoading(true)
@@ -172,6 +189,20 @@ export default function Dashboard() {
               ))}
             </div>
             <button
+              onClick={handleCloverSync}
+              disabled={syncing}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all disabled:opacity-60"
+              style={{
+                background: 'rgba(0,230,118,0.08)',
+                border: '1px solid rgba(0,230,118,0.25)',
+                color: '#00e676',
+              }}
+              title="Sincronizar ventas desde Clover"
+            >
+              <Cloud className={`w-4 h-4 ${syncing ? 'animate-pulse' : ''}`} />
+              {syncing ? 'Sincronizando...' : 'Sync Clover'}
+            </button>
+            <button
               onClick={() => fetchDashboard()}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-all dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
             >
@@ -179,6 +210,29 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
+
+        {/* Clover Sync Result */}
+        {syncResult && (
+          <div
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm mb-4 transition-all"
+            style={{
+              background: syncResult.error ? 'rgba(239,68,68,0.08)' : 'rgba(0,230,118,0.08)',
+              border: `1px solid ${syncResult.error ? 'rgba(239,68,68,0.25)' : 'rgba(0,230,118,0.25)'}`,
+              color: syncResult.error ? '#ef4444' : '#00e676',
+            }}
+          >
+            <Cloud className="w-4 h-4 flex-shrink-0" />
+            {syncResult.error ? (
+              <span>Error: {syncResult.error}</span>
+            ) : (
+              <span>
+                <strong>{syncResult.saved}</strong> ventas importadas, <strong>{syncResult.skipped}</strong> omitidas
+                {syncResult.errors > 0 && <>, <strong>{syncResult.errors}</strong> errores</>}
+                {' '}(de {syncResult.total_fetched} ordenes)
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Alerts */}
         {alerts.length > 0 && (

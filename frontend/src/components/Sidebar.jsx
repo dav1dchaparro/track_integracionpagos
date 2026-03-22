@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, Settings, Users,
+  LayoutDashboard, Settings,
   TrendingUp, X, Search, ChevronRight, Crown, LogOut, ShoppingCart,
   Tag, Package, Sparkles,
 } from 'lucide-react'
@@ -9,24 +9,16 @@ import { useAuth } from '../context/AuthContext'
 
 const OWNER_NAV = [
   { to: '/',                   icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/insights',           icon: Sparkles,        label: 'Insights',          badge: 'new' },
+  { to: '/insights',           icon: Sparkles,        label: 'Insights & AI',     badge: 'beta' },
   { to: '/purchase-patterns',  icon: ShoppingCart,    label: 'Pat. de Compra' },
   { to: '/categories',          icon: Tag,             label: 'Categorias' },
   { to: '/products',            icon: Package,         label: 'Productos' },
-  { to: '/users',              icon: Users,           label: 'Equipo' },
   { to: '/settings',           icon: Settings,        label: 'Ajustes' },
-]
-
-const SELLER_BASE_NAV = [
-  { to: '/', icon: LayoutDashboard, label: 'Mi Dashboard', perm: null },
-]
-
-const SELLER_OPTIONAL_NAV = [
-  { to: '/settings',  icon: Settings,  label: 'Configuración',  perm: null        },
 ]
 
 const BADGE_COLORS = {
   new: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
+  beta: 'bg-violet-500/20 text-violet-300 border border-violet-500/30',
 }
 
 export default function Sidebar({ open, onClose }) {
@@ -39,15 +31,7 @@ export default function Sidebar({ open, onClose }) {
     navigate('/login', { replace: true })
   }
 
-  let navItems = []
-  if (user?.role === 'owner') {
-    navItems = OWNER_NAV
-  } else if (user?.role === 'seller') {
-    navItems = [
-      ...SELLER_BASE_NAV,
-      ...SELLER_OPTIONAL_NAV,
-    ]
-  }
+  const navItems = OWNER_NAV
 
   const filtered = search
     ? navItems.filter(n => n.label.toLowerCase().includes(search.toLowerCase()))
@@ -93,7 +77,7 @@ export default function Sidebar({ open, onClose }) {
             </div>
             <div>
               <p className="font-bold text-sm leading-none tracking-tight" style={{ color: 'var(--scifi-text)' }}>
-                Analytics Pro
+                Atlas Nexus
               </p>
               <p className="text-[10px] mt-0.5 font-mono" style={{ color: 'var(--scifi-text-muted)' }}>
                 {user?.role === 'owner' ? '[ OWNER ACCESS ]' : '[ SELLER ]'}
@@ -124,7 +108,7 @@ export default function Sidebar({ open, onClose }) {
                 : <TrendingUp className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#00e676' }} />
               }
               <p className="text-xs font-semibold" style={{ color: user.role === 'owner' ? '#fbbf24' : '#00e676' }}>
-                {user.role === 'owner' ? 'Dueño — Acceso total' : 'Vendedor'}
+                {user.role === 'owner' ? 'Emprendedor' : 'Vendedor'}
               </p>
             </div>
           </div>

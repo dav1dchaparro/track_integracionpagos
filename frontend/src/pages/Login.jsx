@@ -1,13 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, Mail, Lock, AlertCircle, Crown, ShoppingBag, Zap } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-
-const DEMOS = [
-  { label: 'Dueño', sub: 'Acceso total', email: 'dueno@demo.com', icon: Crown },
-  { label: 'Vendedor #1', sub: 'Ana García', email: 'ana@demo.com', icon: ShoppingBag },
-  { label: 'Vendedor #2', sub: 'María López', email: 'maria@demo.com', icon: Zap },
-]
 
 export default function Login() {
   const [email, setEmail]       = useState('')
@@ -26,12 +20,6 @@ export default function Login() {
     setLoading(false)
     if (result.success) navigate('/')
     else setError(result.error)
-  }
-
-  const quickFill = (demoEmail) => {
-    setEmail(demoEmail)
-    setPassword('123456')
-    setError('')
   }
 
   return (
@@ -132,44 +120,6 @@ export default function Login() {
             <h2 className="text-lg font-semibold text-white mb-1">Bienvenido de vuelta</h2>
             <p className="text-sm text-white/40 mb-6">Ingresa tus credenciales para acceder</p>
 
-            {/* Demo shortcuts */}
-            <div className="mb-6">
-              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2.5">
-                Acceso rápido — demo
-              </p>
-              <div className="grid grid-cols-3 gap-2">
-                {DEMOS.map(d => (
-                  <button
-                    key={d.email}
-                    onClick={() => quickFill(d.email)}
-                    className="flex flex-col items-center gap-2 py-3 px-2 rounded-xl transition-all duration-200"
-                    style={{
-                      background: email === d.email ? 'rgba(0,210,180,0.12)' : 'rgba(255,255,255,0.03)',
-                      border: email === d.email ? '1px solid rgba(0,210,180,0.4)' : '1px solid rgba(255,255,255,0.06)',
-                    }}
-                  >
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center"
-                      style={{ background: email === d.email ? 'rgba(0,210,180,0.2)' : 'rgba(255,255,255,0.06)' }}
-                    >
-                      <d.icon className="w-4 h-4" style={{ color: email === d.email ? '#00d2b4' : 'rgba(255,255,255,0.4)' }} />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-[10px] font-bold text-white/80 leading-tight">{d.label}</p>
-                      <p className="text-[9px] text-white/30 leading-tight mt-0.5">{d.sub}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="flex items-center gap-3 mb-5">
-              <div className="flex-1 h-px bg-white/8" />
-              <span className="text-[11px] text-white/25">o ingresa tu email</span>
-              <div className="flex-1 h-px bg-white/8" />
-            </div>
-
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -247,11 +197,6 @@ export default function Login() {
                 ) : 'Ingresar al Dashboard →'}
               </button>
             </form>
-
-            <p className="text-center text-[11px] text-white/25 mt-5">
-              Contraseña para todos los demos:{' '}
-              <span className="font-mono font-bold text-white/50 bg-white/5 px-1.5 py-0.5 rounded">123456</span>
-            </p>
 
             <div className="flex items-center gap-3 mt-5">
               <div className="flex-1 h-px bg-white/8" />

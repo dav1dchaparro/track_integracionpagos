@@ -7,8 +7,6 @@ import Dashboard from './pages/Dashboard'
 import Settings from './pages/Settings'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import SellerDashboard from './pages/SellerDashboard'
-import UserManagement from './pages/UserManagement'
 import PurchasePatterns from './pages/PurchasePatterns'
 import Insights from './pages/Insights'
 import Categories from './pages/Categories'
@@ -42,25 +40,9 @@ function AppInner() {
           />
           <main className="flex-1 overflow-hidden flex flex-col">
             <Routes>
-              {/* Home: owner → full dashboard, seller → personal dashboard */}
-              <Route
-                path="/"
-                element={user.role === 'owner' ? <Dashboard /> : <SellerDashboard />}
-              />
-
-              {/* Owner-only routes */}
-              <Route
-                path="/users"
-                element={user.role === 'owner' ? <UserManagement /> : <Navigate to="/" replace />}
-              />
-              <Route
-                path="/purchase-patterns"
-                element={user.role === 'owner' ? <PurchasePatterns /> : <Navigate to="/" replace />}
-              />
-              <Route
-                path="/insights"
-                element={user.role === 'owner' ? <Insights /> : <Navigate to="/" replace />}
-              />
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/purchase-patterns" element={<PurchasePatterns />} />
+              <Route path="/insights" element={<Insights />} />
 
               <Route path="/categories" element={<Categories />} />
               <Route path="/products" element={<Products />} />

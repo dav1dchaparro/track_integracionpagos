@@ -126,4 +126,16 @@ interface ApiService {
     /** Lista todas las categorías del comercio */
     @GET("categories/")
     suspend fun getCategories(): Response<List<CategoryDto>>
+
+    // ═══════════════════════════════════════════════════════════
+    //  INSIGHTS — IA y Alertas
+    // ═══════════════════════════════════════════════════════════
+
+    /** Briefing diario generado por IA con datos del negocio */
+    @GET("insights/briefing")
+    suspend fun getBriefing(): Response<BriefingResponse>
+
+    /** Alertas inteligentes: clientes en riesgo, productos lentos, metas */
+    @GET("insights/alerts")
+    suspend fun getAlerts(): Response<AlertsResponse>
 }
