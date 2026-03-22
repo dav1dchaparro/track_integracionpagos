@@ -15,7 +15,7 @@ import Categories from './pages/Categories'
 import Products from './pages/Products'
 
 function AppInner() {
-  const { user, getPerms } = useAuth()
+  const { user } = useAuth()
   const [darkMode, setDarkMode] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
@@ -28,8 +28,6 @@ function AppInner() {
       </Routes>
     )
   }
-
-  const perms = user.role === 'seller' ? (getPerms ? getPerms(user.id) : {}) : null
 
   return (
     <div className={darkMode ? 'dark' : ''}>

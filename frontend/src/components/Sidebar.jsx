@@ -31,7 +31,7 @@ const BADGE_COLORS = {
 
 export default function Sidebar({ open, onClose }) {
   const [search, setSearch] = useState('')
-  const { user, getPerms, logout } = useAuth()
+  const { user, logout } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -43,10 +43,9 @@ export default function Sidebar({ open, onClose }) {
   if (user?.role === 'owner') {
     navItems = OWNER_NAV
   } else if (user?.role === 'seller') {
-    const perms = getPerms ? getPerms(user.id) : {}
     navItems = [
       ...SELLER_BASE_NAV,
-      ...SELLER_OPTIONAL_NAV.filter(n => n.perm === null || perms[n.perm]),
+      ...SELLER_OPTIONAL_NAV,
     ]
   }
 

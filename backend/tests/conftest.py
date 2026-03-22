@@ -3,7 +3,7 @@ from starlette.testclient import TestClient
 
 from app.config import settings
 from app.database import Database, init_db
-from app.routers import auth, sales, stream, categories, products, dashboard
+from app.routers import auth, sales, stream, categories, products, dashboard, users
 
 from fastapi import FastAPI
 
@@ -15,6 +15,7 @@ test_app.include_router(stream.router)
 test_app.include_router(categories.router)
 test_app.include_router(products.router)
 test_app.include_router(dashboard.router)
+test_app.include_router(users.router)
 
 
 TEST_DATABASE_URL = settings.database_url.rsplit("/", 1)[0] + "/test_db"

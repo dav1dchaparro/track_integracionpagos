@@ -8,7 +8,9 @@ def test_register(client):
     data = resp.json()
     assert data["email"] == "test@example.com"
     assert data["store_name"] == "Test Store"
+    assert data["rol"] == "admin"
     assert "id" in data
+    assert "business_id" in data
 
 
 def test_register_duplicate_email(client):

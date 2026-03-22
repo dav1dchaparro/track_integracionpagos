@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import get_current_user
+from app.models.business import Business
 from app.models.user import User
 from app.schemas.user import UserRegister, UserLogin, UserResponse, TokenResponse
 from app.services.auth import hash_password, verify_password, create_access_token, decode_expired_token
@@ -13,17 +14,32 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 _bearer = HTTPBearer(auto_error=False)
 
 
+def _user_response(user: User) -> dict:
+    return {
+        "id": user.id,
+        "business_id": user.business_id,
+        "email": user.email,
+        "rol": user.rol,
+        "store_name": user.business.store_name,
+        "created_at": user.created_at,
+    }
+
+
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(data: UserRegister, db: Session = Depends(get_db)):
     result = db.execute(select(User).where(User.email == data.email))
     if result.scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
 
-    user = User(store_name=data.store_name, email=data.email, password=hash_password(data.password))
+    business = Business(store_name=data.store_name)
+    db.add(business)
+    db.flush()
+
+    user = User(business_id=business.id, email=data.email, password=hash_password(data.password), rol="admin")
     db.add(user)
     db.commit()
     db.refresh(user)
-    return user
+    return _user_response(user)
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -59,4 +75,4 @@ def refresh(
 
 @router.get("/me", response_model=UserResponse)
 def me(user: User = Depends(get_current_user)):
-    return user
+    return _user_response(user)

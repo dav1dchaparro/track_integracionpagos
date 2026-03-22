@@ -35,7 +35,7 @@ async def create_sale(
 
     product_ids = [item.product_id for item in data.items]
     result = db.execute(
-        select(Product).where(Product.id.in_(product_ids), Product.user_id == user.id)
+        select(Product).where(Product.id.in_(product_ids), Product.business_id == user.business_id)
     )
     products = {p.id: p for p in result.unique().scalars().all()}
 
@@ -58,7 +58,7 @@ async def create_sale(
         ))
 
     sale = Sale(
-        user_id=user.id,
+        business_id=user.business_id,
         invoice_number=data.invoice_number,
         payment_method=data.payment_method.value,
         card_type=data.card_type.value if data.card_type else None,
@@ -72,7 +72,7 @@ async def create_sale(
     db.commit()
     db.refresh(sale)
 
-    await event_manager.broadcast(str(user.id), {
+    await event_manager.broadcast(str(user.business_id), {
         "id": str(sale.id),
         "invoice_number": sale.invoice_number,
         "total": float(sale.total),
@@ -91,7 +91,7 @@ def list_sales(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
 ):
-    query = select(Sale).where(Sale.user_id == user.id)
+    query = select(Sale).where(Sale.business_id == user.business_id)
 
     if payment_method:
         query = query.where(Sale.payment_method == payment_method)

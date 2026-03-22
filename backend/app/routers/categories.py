@@ -17,7 +17,7 @@ def create_category(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    category = Category(user_id=user.id, name=data.name)
+    category = Category(business_id=user.business_id, name=data.name)
     db.add(category)
     db.commit()
     db.refresh(category)
@@ -29,5 +29,5 @@ def list_categories(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    result = db.execute(select(Category).where(Category.user_id == user.id))
+    result = db.execute(select(Category).where(Category.business_id == user.business_id))
     return result.scalars().all()
