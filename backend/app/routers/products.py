@@ -21,7 +21,7 @@ def create_product(
     categories = db.execute(
         select(Category).where(
             Category.id.in_(data.category_ids),
-            Category.user_id == user.id,
+            Category.business_id == user.business_id,
         )
     ).scalars().all()
 
@@ -29,7 +29,7 @@ def create_product(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="One or more categories not found")
 
     product = Product(
-        user_id=user.id,
+        business_id=user.business_id,
         name=data.name,
         price=data.price,
         categories=categories,
@@ -48,7 +48,7 @@ def update_product_categories(
     db: Session = Depends(get_db),
 ):
     product = db.execute(
-        select(Product).where(Product.id == product_id, Product.user_id == user.id)
+        select(Product).where(Product.id == product_id, Product.business_id == user.business_id)
     ).unique().scalar_one_or_none()
 
     if not product:
@@ -57,7 +57,7 @@ def update_product_categories(
     categories = db.execute(
         select(Category).where(
             Category.id.in_(data.category_ids),
-            Category.user_id == user.id,
+            Category.business_id == user.business_id,
         )
     ).scalars().all()
 
@@ -75,5 +75,5 @@ def list_products(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    result = db.execute(select(Product).where(Product.user_id == user.id))
+    result = db.execute(select(Product).where(Product.business_id == user.business_id))
     return result.unique().scalars().all()

@@ -12,7 +12,7 @@ class Sale(Base):
     __tablename__ = "sales"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"))
+    business_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("businesses.id"))
     invoice_number: Mapped[str] = mapped_column(String(100))
     payment_method: Mapped[str] = mapped_column(SAEnum("card", "qr", name="payment_method_enum"))
     card_type: Mapped[str | None] = mapped_column(SAEnum("credit", "debit", name="card_type_enum"), nullable=True)

@@ -15,14 +15,30 @@ class UserLogin(BaseModel):
     password: str
 
 
-class UserResponse(BaseModel):
+class BusinessResponse(BaseModel):
     id: uuid.UUID
     store_name: str
-    email: str
     created_at: datetime
     monthly_goal: float | None = None
 
     model_config = {"from_attributes": True}
+
+
+class UserResponse(BaseModel):
+    id: uuid.UUID
+    business_id: uuid.UUID
+    email: str
+    rol: str
+    store_name: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class SellerCreate(BaseModel):
+    name: str
+    email: str
+    password: str
 
 
 class TokenResponse(BaseModel):

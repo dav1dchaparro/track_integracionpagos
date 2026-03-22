@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import Database, init_db
-from app.routers import auth, sales, stream, categories, products, dashboard, insights
+from app.routers import auth, sales, stream, categories, products, dashboard, users, forecasting, insights
 
 
 @asynccontextmanager
@@ -33,7 +33,8 @@ app.include_router(categories.router)
 app.include_router(products.router)
 app.include_router(dashboard.router)
 app.include_router(insights.router)
-
+app.include_router(users.router)
+app.include_router(forecasting.router)
 
 @app.get("/health")
 async def health():

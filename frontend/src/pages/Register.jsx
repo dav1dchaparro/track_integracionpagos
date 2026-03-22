@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  TrendingUp, Eye, EyeOff, Mail, Lock, User, Building2, Phone,
+  Eye, EyeOff, Mail, Lock, User, Building2, Phone,
   AlertCircle, CheckCircle, ArrowLeft, Shield,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -14,8 +14,8 @@ function getStrength(pwd) {
   const hasNum     = /[0-9]/.test(pwd)
   const hasSpecial = /[^A-Za-z0-9]/.test(pwd)
   const extras = [hasUpper, hasNum, hasSpecial].filter(Boolean).length
-  if (pwd.length >= 10 && extras >= 2) return { level: 4, label: 'Muy fuerte', color: '#16a34a', bars: 4 }
-  if (pwd.length >= 8  && extras >= 1) return { level: 3, label: 'Fuerte',     color: '#22c55e', bars: 3 }
+  if (pwd.length >= 10 && extras >= 2) return { level: 4, label: 'Muy fuerte', color: '#00d2b4', bars: 4 }
+  if (pwd.length >= 8  && extras >= 1) return { level: 3, label: 'Fuerte',     color: '#00d2b4', bars: 3 }
   if (pwd.length >= 6  && extras >= 1) return { level: 2, label: 'Regular',    color: '#f59e0b', bars: 2 }
   return { level: 1, label: 'Débil', color: '#f97316', bars: 1 }
 }
@@ -30,7 +30,7 @@ function StrengthBar({ password }) {
           <div
             key={i}
             className="h-1 flex-1 rounded-full transition-all duration-300"
-            style={{ backgroundColor: i <= s.bars ? s.color : '#e5e7eb' }}
+            style={{ backgroundColor: i <= s.bars ? s.color : 'rgba(255,255,255,0.08)' }}
           />
         ))}
       </div>
@@ -39,33 +39,36 @@ function StrengthBar({ password }) {
   )
 }
 
-// ─── Requirement chip ─────────────────────────────────────────────────────────
 function Req({ ok, label }) {
   return (
-    <li className={`flex items-center gap-1.5 text-[11px] transition-colors ${ok ? 'text-green-600' : 'text-gray-400'}`}>
-      <CheckCircle className={`w-3 h-3 flex-shrink-0 ${ok ? 'text-green-500' : 'text-gray-300'}`} />
+    <li className={`flex items-center gap-1.5 text-[11px] transition-colors ${ok ? 'text-emerald-400' : 'text-white/25'}`}>
+      <CheckCircle className={`w-3 h-3 flex-shrink-0 ${ok ? 'text-emerald-400' : 'text-white/15'}`} />
       {label}
     </li>
   )
 }
 
-// ─── Input field ──────────────────────────────────────────────────────────────
-function Field({ label, icon: Icon, required, hint, children }) {
+const inputClass = "w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm placeholder-white/20 focus:outline-none transition-all"
+const inputStyle = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
+const focusHandlers = {
+  onFocus: e => { e.target.style.borderColor = 'rgba(0,210,180,0.4)'; e.target.style.background = 'rgba(0,210,180,0.05)' },
+  onBlur: e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.04)' },
+}
+
+function Field({ label, icon: Icon, required, children }) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+      <label className="block text-xs font-semibold text-white/60 mb-1.5">
         {label} {required && <span className="text-red-400">*</span>}
       </label>
       <div className="relative">
-        <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+        <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25 pointer-events-none" />
         {children}
       </div>
-      {hint && <p className="text-[11px] text-gray-400 mt-1">{hint}</p>}
     </div>
   )
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Register() {
   const [form, setForm] = useState({
     name: '', email: '', password: '', confirm: '', department: '', phone: '',
@@ -85,8 +88,8 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!pwdOk6)        return setError('La contraseña debe tener al menos 6 caracteres')
-    if (!pwdMatch)      return setError('Las contraseñas no coinciden')
+    if (!pwdOk6)   return setError('La contraseña debe tener al menos 6 caracteres')
+    if (!pwdMatch) return setError('Las contraseñas no coinciden')
 
     setLoading(true)
     const result = await register({
@@ -101,163 +104,152 @@ export default function Register() {
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center py-10 px-4"
-      style={{ background: 'linear-gradient(135deg, #0a1a0f 0%, #0d1f13 40%, #0f172a 100%)' }}
-    >
-      {/* Decorative orbs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 right-1/4 w-72 h-72 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #22c55e, transparent)' }} />
-        <div className="absolute bottom-1/3 left-1/4 w-48 h-48 rounded-full opacity-8"
-          style={{ background: 'radial-gradient(circle, #16a34a, transparent)' }} />
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center py-10 px-4">
+      {/* ── Background ── */}
+      <div className="absolute inset-0 bg-[#050a0e]">
+        <div
+          className="absolute w-[700px] h-[700px] rounded-full"
+          style={{
+            top: '-10%', right: '-10%',
+            background: 'radial-gradient(circle, rgba(0,210,180,0.35) 0%, rgba(0,180,160,0.15) 40%, transparent 70%)',
+            filter: 'blur(80px)',
+            animation: 'blobDrift 12s ease-in-out infinite alternate',
+          }}
+        />
+        <div
+          className="absolute w-[600px] h-[600px] rounded-full"
+          style={{
+            bottom: '-15%', left: '-5%',
+            background: 'radial-gradient(circle, rgba(0,220,190,0.3) 0%, rgba(0,160,140,0.1) 40%, transparent 70%)',
+            filter: 'blur(90px)',
+            animation: 'blobDrift 15s ease-in-out infinite alternate-reverse',
+          }}
+        />
       </div>
 
-      <div className="relative w-full max-w-md">
-        {/* Back to login */}
+      {/* ── Content ── */}
+      <div className="relative z-10 w-full max-w-md">
         <Link
           to="/login"
-          className="inline-flex items-center gap-2 text-sm text-green-400/70 hover:text-green-400 transition-colors mb-6"
+          className="inline-flex items-center gap-2 text-sm text-[#00d2b4]/60 hover:text-[#00d2b4] transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver al inicio de sesión
         </Link>
 
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          {/* Card header */}
-          <div className="px-8 pt-8 pb-6" style={{ background: 'linear-gradient(135deg, #0d1f13, #14532d)' }}>
+        <div
+          className="w-full rounded-2xl overflow-hidden"
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            backdropFilter: 'blur(24px)',
+            boxShadow: '0 32px 64px rgba(0,0,0,0.4)',
+          }}
+        >
+          {/* Header */}
+          <div className="px-8 pt-8 pb-6" style={{ background: 'linear-gradient(135deg, rgba(0,210,180,0.08), rgba(0,160,140,0.04))' }}>
             <div className="flex items-center gap-3 mb-5">
               <div
-                className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}
+                className="w-10 h-10 flex items-center justify-center"
+                style={{ filter: 'drop-shadow(0 0 8px rgba(0,255,80,0.6))' }}
               >
-                <TrendingUp className="w-5 h-5 text-white" strokeWidth={2.5} />
+                <svg width="32" height="28" viewBox="0 0 260 225" fill="none">
+                  <path fillRule="evenodd" d="M115,40 Q130,5 145,40 L225,172 Q255,220 200,220 L60,220 Q5,220 35,172 Z M130,88 L186,180 L74,180 Z" fill="#00e850"/>
+                </svg>
               </div>
               <div>
-                <p className="font-bold text-white text-sm leading-none">Analytics Pro</p>
-                <p className="text-[10px] mt-0.5" style={{ color: 'rgba(74,222,128,0.6)' }}>Registro de nueva cuenta</p>
+                <p className="font-bold text-white text-sm tracking-wide leading-none">ATLAS NEXUS</p>
+                <p className="text-[10px] mt-0.5 text-[#00d2b4]/50">Registro de nueva cuenta</p>
               </div>
             </div>
             <h1 className="text-2xl font-bold text-white mb-1">Crear cuenta</h1>
-            <p className="text-sm" style={{ color: 'rgba(74,222,128,0.6)' }}>
-              Te registrarás como <strong className="text-green-300">Vendedor</strong>. El dueño podrá gestionar tus permisos.
+            <p className="text-sm text-white/40">
+              Te registrarás como <strong className="text-[#00d2b4]">Vendedor</strong>. El dueño podrá gestionar tus permisos.
             </p>
           </div>
 
           {/* Role notice */}
-          <div className="mx-8 mt-6 flex items-center gap-3 px-4 py-3 rounded-2xl bg-blue-50 border border-blue-100">
-            <Shield className="w-5 h-5 text-blue-500 flex-shrink-0" />
-            <p className="text-xs text-blue-700 leading-snug">
-              Las cuentas de <strong>Dueño</strong> son configuradas directamente por el administrador del sistema.
+          <div className="mx-8 mt-6 flex items-center gap-3 px-4 py-3 rounded-xl"
+            style={{ background: 'rgba(0,210,180,0.06)', border: '1px solid rgba(0,210,180,0.12)' }}
+          >
+            <Shield className="w-5 h-5 text-[#00d2b4]/60 flex-shrink-0" />
+            <p className="text-xs text-white/50 leading-snug">
+              Las cuentas de <strong className="text-white/70">Dueño</strong> son configuradas directamente por el administrador del sistema.
             </p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="px-8 py-6 space-y-4">
-
-            <Field label="Nombre completo" icon={User} required hint="">
-              <input
-                type="text"
-                value={form.name}
-                onChange={e => set('name', e.target.value)}
-                placeholder="Ej: Laura Sánchez"
-                required
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:bg-white transition-all"
-              />
+            <Field label="Nombre completo" icon={User} required>
+              <input type="text" value={form.name} onChange={e => set('name', e.target.value)}
+                placeholder="Ej: Laura Sánchez" required className={inputClass} style={inputStyle} {...focusHandlers} />
             </Field>
 
             <Field label="Email" icon={Mail} required>
-              <input
-                type="email"
-                value={form.email}
-                onChange={e => set('email', e.target.value)}
-                placeholder="tu@empresa.com"
-                required
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:bg-white transition-all"
-              />
+              <input type="email" value={form.email} onChange={e => set('email', e.target.value)}
+                placeholder="tu@empresa.com" required className={inputClass} style={inputStyle} {...focusHandlers} />
             </Field>
 
             <div className="grid grid-cols-2 gap-3">
               <Field label="Departamento" icon={Building2}>
-                <input
-                  type="text"
-                  value={form.department}
-                  onChange={e => set('department', e.target.value)}
-                  placeholder="Ventas"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:bg-white transition-all"
-                />
+                <input type="text" value={form.department} onChange={e => set('department', e.target.value)}
+                  placeholder="Ventas" className={inputClass} style={inputStyle} {...focusHandlers} />
               </Field>
               <Field label="Teléfono" icon={Phone}>
-                <input
-                  type="text"
-                  value={form.phone}
-                  onChange={e => set('phone', e.target.value)}
-                  placeholder="+34 600..."
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:bg-white transition-all"
-                />
+                <input type="text" value={form.phone} onChange={e => set('phone', e.target.value)}
+                  placeholder="+34 600..." className={inputClass} style={inputStyle} {...focusHandlers} />
               </Field>
             </div>
 
             <Field label="Contraseña" icon={Lock} required>
-              <input
-                type={showPass ? 'text' : 'password'}
-                value={form.password}
-                onChange={e => set('password', e.target.value)}
-                placeholder="Mínimo 6 caracteres"
-                required
-                className="w-full pl-10 pr-12 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:bg-white transition-all"
-              />
+              <input type={showPass ? 'text' : 'password'} value={form.password}
+                onChange={e => set('password', e.target.value)} placeholder="Mínimo 6 caracteres" required
+                className={`${inputClass} pr-12`} style={inputStyle} {...focusHandlers} />
               <button type="button" onClick={() => setShowPass(!showPass)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors">
                 {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
               {form.password && <StrengthBar password={form.password} />}
             </Field>
 
             <Field label="Confirmar contraseña" icon={Lock} required>
-              <input
-                type={showConfirm ? 'text' : 'password'}
-                value={form.confirm}
-                onChange={e => set('confirm', e.target.value)}
-                placeholder="Repite tu contraseña"
-                required
-                className={`w-full pl-10 pr-12 py-3 rounded-xl border text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:bg-white transition-all ${
-                  form.confirm && !pwdMatch
-                    ? 'border-red-300 bg-red-50'
+              <input type={showConfirm ? 'text' : 'password'} value={form.confirm}
+                onChange={e => set('confirm', e.target.value)} placeholder="Repite tu contraseña" required
+                className={`${inputClass} pr-12`}
+                style={{
+                  ...inputStyle,
+                  ...(form.confirm && !pwdMatch
+                    ? { borderColor: 'rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.05)' }
                     : form.confirm && pwdMatch
-                    ? 'border-green-300 bg-green-50'
-                    : 'border-gray-200 bg-gray-50'
-                }`}
+                    ? { borderColor: 'rgba(0,210,180,0.3)', background: 'rgba(0,210,180,0.05)' }
+                    : {}),
+                }}
+                {...focusHandlers}
               />
               <button type="button" onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors">
                 {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </Field>
 
-            {/* Requirements checklist */}
             <ul className="space-y-1.5 px-1">
               <Req ok={pwdOk6}  label="Mínimo 6 caracteres" />
               <Req ok={pwdMatch && !!form.confirm} label="Las contraseñas coinciden" />
             </ul>
 
-            {/* Error */}
             {error && (
-              <div className="flex items-center gap-2.5 px-3.5 py-3 bg-red-50 border border-red-200 rounded-xl">
-                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="flex items-center gap-2.5 px-3.5 py-3 rounded-xl"
+                style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}
+              >
+                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                <p className="text-sm text-red-300">{error}</p>
               </div>
             )}
 
-            {/* Submit */}
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 rounded-xl font-bold text-white text-sm transition-all duration-200 disabled:opacity-70 flex items-center justify-center gap-2.5 mt-2"
-              style={{
-                background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-                boxShadow: '0 4px 15px rgba(22,163,74,0.35)',
-              }}
+              type="submit" disabled={loading}
+              className="w-full py-3.5 rounded-xl font-bold text-white text-sm transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-2.5 mt-2 hover:brightness-110"
+              style={{ background: 'linear-gradient(135deg, #00d2b4, #00a896)', boxShadow: '0 4px 20px rgba(0,210,180,0.3)' }}
             >
               {loading ? (
                 <>
@@ -267,15 +259,21 @@ export default function Register() {
               ) : 'Crear mi cuenta →'}
             </button>
 
-            <p className="text-center text-xs text-gray-400 pt-1">
+            <p className="text-center text-xs text-white/30 pt-1">
               ¿Ya tienes cuenta?{' '}
-              <Link to="/login" className="font-semibold text-green-600 hover:underline">
-                Inicia sesión
-              </Link>
+              <Link to="/login" className="font-semibold text-[#00d2b4] hover:underline">Inicia sesión</Link>
             </p>
           </form>
         </div>
       </div>
+
+      <style>{`
+        @keyframes blobDrift {
+          0%   { transform: translate(0, 0) scale(1); }
+          50%  { transform: translate(-30px, 20px) scale(1.08); }
+          100% { transform: translate(15px, -15px) scale(0.95); }
+        }
+      `}</style>
     </div>
   )
 }

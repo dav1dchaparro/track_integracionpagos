@@ -24,6 +24,7 @@ export async function apiFetch(path, options = {}, _retried = false) {
     throw new Error('Sesion expirada')
   }
 
+  if (res.status === 204) return null
   const data = await res.json()
   if (!res.ok) throw new Error(data.detail || 'Error del servidor')
   return data
@@ -40,7 +41,7 @@ export function AuthProvider({ children }) {
       return
     }
     apiFetch('/auth/me')
-      .then(u => setUser({ ...u, role: 'owner', initials: u.store_name.slice(0, 2).toUpperCase() }))
+      .then(u => setUser({ ...u, role: u.rol === 'admin' ? 'owner' : 'seller', initials: u.store_name.slice(0, 2).toUpperCase() }))
       .catch(() => {
         localStorage.removeItem('auth_token')
       })
@@ -55,7 +56,7 @@ export function AuthProvider({ children }) {
       })
       localStorage.setItem('auth_token', data.access_token)
       const me = await apiFetch('/auth/me')
-      setUser({ ...me, role: 'owner', initials: me.store_name.slice(0, 2).toUpperCase() })
+      setUser({ ...me, role: me.rol === 'admin' ? 'owner' : 'seller', initials: me.store_name.slice(0, 2).toUpperCase() })
       return { success: true }
     } catch (err) {
       return { error: err.message }
@@ -83,18 +84,9 @@ export function AuthProvider({ children }) {
     return null
   }
 
-  // Stubs for seller management (not yet backed by API)
-  const sellers = []
-  const sellerPerms = {}
-  const addSeller = () => {}
-  const removeSeller = () => {}
-  const updatePerm = () => {}
-  const getPerms = () => ({ reports: false, analytics: false })
-
   return (
     <AuthContext.Provider value={{
       user, login, logout, register,
-      sellers, sellerPerms, addSeller, removeSeller, updatePerm, getPerms,
     }}>
       {children}
     </AuthContext.Provider>
