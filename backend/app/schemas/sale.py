@@ -53,6 +53,7 @@ class SaleCreate(BaseModel):
     card_type: CardType | None = None
     card_brand: CardBrand | None = None
     card_category: CardCategory | None = None
+    customer_email: str | None = None
     items: list[SaleItemCreate]
     sold_at: datetime | None = None
 
@@ -64,6 +65,7 @@ class SaleResponse(BaseModel):
     card_type: CardType | None
     card_brand: CardBrand | None
     card_category: CardCategory | None
+    customer_email: str | None
     total: float
     items: list[SaleItemResponse]
     sold_at: datetime

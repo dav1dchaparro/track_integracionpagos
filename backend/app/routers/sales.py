@@ -64,6 +64,7 @@ async def create_sale(
         card_type=data.card_type.value if data.card_type else None,
         card_brand=data.card_brand.value if data.card_brand else None,
         card_category=data.card_category.value if data.card_category else None,
+        customer_email=data.customer_email,
         total=total,
         **({"sold_at": data.sold_at} if data.sold_at else {}),
         items=sale_items,

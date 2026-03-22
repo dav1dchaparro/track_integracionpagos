@@ -22,6 +22,7 @@ class Sale(Base):
         "infinite", "world", "world_elite", "centurion",
         name="card_category_enum",
     ), nullable=True)
+    customer_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     total: Mapped[float] = mapped_column(Numeric(12, 2))
     sold_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 

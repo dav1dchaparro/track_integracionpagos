@@ -20,6 +20,7 @@ class UserResponse(BaseModel):
     store_name: str
     email: str
     created_at: datetime
+    monthly_goal: float | None = None
 
     model_config = {"from_attributes": True}
 

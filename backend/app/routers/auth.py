@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel as PydanticBase
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -60,3 +61,19 @@ def refresh(
 @router.get("/me", response_model=UserResponse)
 def me(user: User = Depends(get_current_user)):
     return user
+
+
+class GoalUpdate(PydanticBase):
+    monthly_goal: float
+
+@router.put("/me/goal")
+def update_goal(
+    data: GoalUpdate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user.monthly_goal = data.monthly_goal
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return {"monthly_goal": float(user.monthly_goal)}

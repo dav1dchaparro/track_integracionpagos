@@ -44,6 +44,35 @@ def summary(
     total_orders = len(sales)
     avg_ticket = total_revenue / total_orders if total_orders else 0
 
+    # Previous period KPIs
+    if days == 0:
+        prev_since = since - timedelta(days=1)
+    else:
+        prev_since = since - timedelta(days=days)
+
+    prev_sales = db.execute(
+        select(Sale).where(
+            Sale.user_id == user.id,
+            Sale.sold_at >= prev_since,
+            Sale.sold_at < since,
+        )
+    ).unique().scalars().all()
+
+    prev_revenue = sum(float(s.total) for s in prev_sales)
+    prev_orders = len(prev_sales)
+    prev_avg_ticket = prev_revenue / prev_orders if prev_orders else 0
+
+    def pct_change(curr: float, prev: float):
+        if prev == 0:
+            return None
+        return round((curr - prev) / prev * 100, 1)
+
+    kpi_changes = {
+        "total_revenue": pct_change(total_revenue, prev_revenue),
+        "total_orders": pct_change(total_orders, prev_orders),
+        "avg_ticket": pct_change(avg_ticket, prev_avg_ticket),
+    }
+
     # Payment method breakdown
     payment_methods = defaultdict(lambda: {"count": 0, "total": 0})
     for s in sales:
@@ -122,6 +151,27 @@ def summary(
         select(func.count()).select_from(Category).where(Category.user_id == user.id)
     ).scalar()
 
+    # Customer metrics
+    emails = [s.customer_email for s in sales if s.customer_email]
+    unique_customers = len(set(emails))
+    email_counts: dict = defaultdict(int)
+    for e in emails:
+        email_counts[e] += 1
+    returning_customers = sum(1 for c in email_counts.values() if c > 1)
+    return_rate = round(returning_customers / unique_customers * 100, 1) if unique_customers else 0
+
+    top_customers = sorted(
+        [
+            {
+                "email": e,
+                "orders": email_counts[e],
+                "total": round(sum(float(s.total) for s in sales if s.customer_email == e), 2),
+            }
+            for e in set(emails)
+        ],
+        key=lambda x: -x["total"],
+    )[:5]
+
     return {
         "period": period,
         "kpis": {
@@ -130,7 +180,10 @@ def summary(
             "avg_ticket": round(avg_ticket, 2),
             "total_products": total_products,
             "total_categories": total_categories,
+            "unique_customers": unique_customers,
+            "return_rate": return_rate,
         },
+        "kpi_changes": kpi_changes,
         "payment_methods": {
             k: {"count": v["count"], "total": round(v["total"], 2)}
             for k, v in payment_methods.items()
@@ -142,4 +195,5 @@ def summary(
         "sales_timeline": sales_timeline,
         "top_products": top_products,
         "category_breakdown": category_breakdown,
+        "top_customers": top_customers,
     }

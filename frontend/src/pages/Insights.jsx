@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { apiFetch } from '../context/AuthContext'
 import {
   BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
@@ -8,7 +9,7 @@ import {
   Mail, Share2, Search, MousePointerClick, RotateCcw, CheckCircle2,
   Clock, ArrowUpRight, ChevronRight, Flame, Star, ShieldAlert,
   Megaphone, RefreshCw, Activity, BadgeCheck, Circle,
-  Play, Pause, Eye,
+  Play, Pause, Eye, Send, Bot,
 } from 'lucide-react'
 import ChartCard from '../components/ChartCard'
 
@@ -243,6 +244,41 @@ export default function Insights() {
   const [activeInsight, setActiveInsight] = useState(null)
   const [filterPriority, setFilterPriority] = useState('Todos')
   const [campaignTab, setCampaignTab] = useState('planificada')
+  const [chatMessages, setChatMessages] = useState([
+    { role: 'assistant', text: '¡Hola! Soy tu asistente de ventas. Pregúntame sobre tus datos, tendencias o qué hacer para vender más.' }
+  ])
+  const [chatInput, setChatInput] = useState('')
+  const [chatLoading, setChatLoading] = useState(false)
+  const [chatPeriod, setChatPeriod] = useState('month')
+  const chatEndRef = useRef(null)
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [chatMessages])
+
+  const handleChatSend = async (overrideQuestion) => {
+    const q = (overrideQuestion ?? chatInput).trim()
+    if (!q || chatLoading) return
+    setChatInput('')
+    const updatedMessages = [...chatMessages, { role: 'user', text: q }]
+    setChatMessages(updatedMessages)
+    setChatLoading(true)
+    try {
+      // Build history: skip the initial greeting, convert to Groq format
+      const history = updatedMessages
+        .slice(1, -1) // exclude initial greeting and the message just added
+        .map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }))
+      const res = await apiFetch('/insights/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q, period: chatPeriod, history }),
+      })
+      setChatMessages(prev => [...prev, { role: 'assistant', text: res.answer }])
+    } catch {
+      setChatMessages(prev => [...prev, { role: 'assistant', text: 'Error al conectar con el asistente. Intenta de nuevo.' }])
+    }
+    setChatLoading(false)
+  }
 
   const marketingScore = 74
 
@@ -732,6 +768,114 @@ export default function Insights() {
           <p className="text-[11px] mt-2 text-center" style={{ color: 'var(--scifi-text-muted)' }}>
             Clic en una acción para cambiar su estado
           </p>
+        </div>
+      </div>
+
+      {/* ── AI Chat ── */}
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{ background: 'var(--scifi-card)', border: '1px solid var(--scifi-border)' }}
+      >
+        <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--scifi-border)' }}>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(0,230,118,0.1)', border: '1px solid rgba(0,230,118,0.25)' }}>
+              <Sparkles className="w-4 h-4" style={{ color: NEON }} />
+            </div>
+            <div>
+              <p className="text-sm font-bold" style={{ color: 'var(--scifi-text)' }}>Asistente IA</p>
+              <p className="text-[11px]" style={{ color: 'var(--scifi-text-muted)' }}>Powered by Groq · llama-3.3-70b</p>
+            </div>
+          </div>
+          <select
+            value={chatPeriod}
+            onChange={e => setChatPeriod(e.target.value)}
+            className="text-xs px-2 py-1 rounded-lg outline-none"
+            style={{ background: 'var(--scifi-surface)', color: 'var(--scifi-text)', border: '1px solid var(--scifi-border)' }}
+          >
+            <option value="today">Hoy</option>
+            <option value="week">Semana</option>
+            <option value="month">Mes</option>
+            <option value="year">Año</option>
+          </select>
+        </div>
+
+        <div className="h-72 overflow-y-auto p-4 space-y-3" style={{ background: 'var(--scifi-bg)' }}>
+          {chatMessages.map((msg, i) => (
+            <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+              <div
+                className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold"
+                style={{
+                  background: msg.role === 'user' ? 'rgba(0,184,217,0.15)' : 'rgba(0,230,118,0.15)',
+                  color: msg.role === 'user' ? NEON2 : NEON,
+                  border: `1px solid ${msg.role === 'user' ? 'rgba(0,184,217,0.3)' : 'rgba(0,230,118,0.3)'}`,
+                }}
+              >
+                {msg.role === 'user' ? 'Tú' : 'IA'}
+              </div>
+              <div
+                className="max-w-[80%] rounded-xl px-3 py-2 text-sm leading-relaxed"
+                style={{
+                  background: msg.role === 'user' ? 'rgba(0,184,217,0.08)' : 'var(--scifi-surface)',
+                  color: 'var(--scifi-text)',
+                  border: `1px solid ${msg.role === 'user' ? 'rgba(0,184,217,0.2)' : 'var(--scifi-border)'}`,
+                }}
+              >
+                {msg.text}
+              </div>
+            </div>
+          ))}
+          {chatLoading && (
+            <div className="flex gap-2">
+              <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold" style={{ background: 'rgba(0,230,118,0.15)', color: NEON, border: '1px solid rgba(0,230,118,0.3)' }}>IA</div>
+              <div className="rounded-xl px-3 py-2" style={{ background: 'var(--scifi-surface)', border: '1px solid var(--scifi-border)' }}>
+                <div className="flex gap-1">
+                  {[0,1,2].map(i => (
+                    <div key={i} className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: NEON, animationDelay: `${i * 150}ms` }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={chatEndRef} />
+        </div>
+
+        {chatMessages.length <= 1 && (
+          <div className="px-3 pt-2 pb-0 flex flex-wrap gap-2 border-t" style={{ borderColor: 'var(--scifi-border)' }}>
+            {[
+              '¿Cuál es mi producto más vendido?',
+              '¿Cómo puedo vender más este período?',
+              '¿Qué método de pago prefieren mis clientes?',
+              '¿Cuáles son mis horas pico de ventas?',
+            ].map(q => (
+              <button
+                key={q}
+                onClick={() => handleChatSend(q)}
+                disabled={chatLoading}
+                className="text-[11px] px-2.5 py-1 rounded-lg transition-all disabled:opacity-40 hover:opacity-80"
+                style={{ background: 'rgba(0,230,118,0.08)', color: NEON, border: '1px solid rgba(0,230,118,0.2)' }}
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="p-3 flex gap-2 border-t" style={{ borderColor: 'var(--scifi-border)' }}>
+          <input
+            value={chatInput}
+            onChange={e => setChatInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleChatSend()}
+            placeholder="Pregunta sobre tus ventas..."
+            className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+            style={{ background: 'var(--scifi-surface)', color: 'var(--scifi-text)', border: '1px solid var(--scifi-border)' }}
+          />
+          <button
+            onClick={() => handleChatSend()}
+            disabled={chatLoading || !chatInput.trim()}
+            className="px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-40"
+            style={{ background: 'rgba(0,230,118,0.15)', color: NEON, border: '1px solid rgba(0,230,118,0.3)' }}
+          >
+            Enviar
+          </button>
         </div>
       </div>
 
