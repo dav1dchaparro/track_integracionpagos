@@ -52,6 +52,39 @@ Ahora solo se leen las órdenes. Clover tiene muchísimo más.
 
 ---
 
+## Fase 3.5 — Modelos de ML sobre la data transaccional (1-2 semanas)
+
+Ya tenemos XGBoost para forecasting de demanda. Falta sacarle jugo a las ventas históricas con modelos que dan plata rápido. Orden por ROI / facilidad:
+
+- [ ] **Market Basket Analysis (Apriori / FP-Growth)**
+  - Qué hace: descubre qué productos se compran juntos ("café + medialuna 78% de las veces")
+  - Datos que ya tenemos: `sale_items` con producto + factura
+  - Output: motor de recomendaciones "los que compraron X también compraron Y" → sube ticket promedio
+  - Esfuerzo: 1-2 días con `mlxtend`
+
+- [ ] **Segmentación de clientes (RFM + KMeans)**
+  - Qué hace: agrupa clientes en VIP / frecuentes / ocasionales / dormidos / nuevos
+  - Datos que ya tenemos: `customer_email`, `total`, `sold_at`
+  - Output: tags por cliente → marketing dirigido (combinar con WhatsApp promos de Fase 5)
+  - Esfuerzo: 1-2 días con scikit-learn
+
+- [ ] **Churn predictivo (reemplaza la regla actual)**
+  - Qué hace: predice probabilidad de que un cliente no vuelva
+  - Hoy: regla simple ">14 días sin comprar"
+  - Mejora: modelo de clasificación que mira frecuencia histórica, ticket, recurrencia
+  - Esfuerzo: 3-4 días, requiere etiquetar histórico
+
+- [ ] **Detección de anomalías (Isolation Forest)**
+  - Qué hace: detecta ventas raras (monto anormal, hora rara, cantidad sospechosa)
+  - Output: alerta al dueño "esta venta de $50.000 a las 3am es atípica"
+  - Esfuerzo: 1-2 días
+
+### Lo que NO vale la pena todavía
+- **Detección de fraude supervisada** → necesita data etiquetada que el proveedor de pagos no nos da
+- **Precios dinámicos / RL** → muy complejo, asusta al comerciante chico, requiere mucho volumen
+
+---
+
 ## Fase 4 — Diferenciación con IA (1-2 meses)
 
 Esto es lo que va a hacer que el comerciante elija Atlas sobre la competencia.
@@ -112,3 +145,4 @@ Comisión de Clover App Market: ~15-30%. Pensar en eso al fijar precios.
 1. Terminar pantallas faltantes en Android (Productos, Ventas, Insights)
 2. Sacar tokens de Clover hardcodeados y meter OAuth
 3. Verificación de email en el registro
+4. Arrancar Market Basket Analysis (gana rápido con la data que ya hay)
