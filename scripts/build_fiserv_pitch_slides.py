@@ -156,6 +156,35 @@ def stat_card(number, label, width, height, color=FISERV_ORANGE):
     return t
 
 
+def chip_row(items, total_width_cm=24):
+    """A horizontal row of soft colored chips. items: list of (label, color, bg_color)."""
+    cells = []
+    for label, color, bg in items:
+        ch = Paragraph(
+            f"<font color='{color}'><b>● </b></font>{label}",
+            ParagraphStyle("chip", fontName="Helvetica", fontSize=10, leading=12,
+                           textColor=INK, alignment=TA_LEFT)
+        )
+        t = Table([[ch]], colWidths=[(total_width_cm / len(items)) * cm - 0.2 * cm])
+        t.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, -1), bg),
+            ("LEFTPADDING", (0, 0), (-1, -1), 10),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+            ("TOPPADDING", (0, 0), (-1, -1), 8),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+            ("ROUNDEDCORNERS", [12, 12, 12, 12]),
+        ]))
+        cells.append(t)
+    row = Table([cells], colWidths=[(total_width_cm / len(items)) * cm] * len(items))
+    row.setStyle(TableStyle([
+        ("LEFTPADDING", (0, 0), (-1, -1), 2),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 2),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    return row
+
+
 def grid(cells, cols, col_widths, row_heights):
     rows = []
     for i in range(0, len(cells), cols):
@@ -190,8 +219,18 @@ def cover_chrome(canvas, doc):
 
 def slide_chrome(canvas, doc):
     canvas.saveState()
+    # Top brand strip
     canvas.setFillColor(FISERV_ORANGE)
     canvas.rect(0, PAGE_H - 0.35 * cm, PAGE_W, 0.35 * cm, fill=1, stroke=0)
+    # Decorative left navy stripe
+    canvas.setFillColor(FISERV_NAVY)
+    canvas.rect(0, 0, 0.18 * cm, PAGE_H - 0.35 * cm, fill=1, stroke=0)
+    # Decorative orange dot bottom-right
+    canvas.setFillColor(FISERV_ORANGE)
+    canvas.circle(PAGE_W - 0.85 * cm, 0.85 * cm, 0.32 * cm, fill=1, stroke=0)
+    canvas.setFillColor(colors.HexColor("#FFE9D6"))
+    canvas.circle(PAGE_W - 1.6 * cm, 0.85 * cm, 0.18 * cm, fill=1, stroke=0)
+    # Footer line
     canvas.setStrokeColor(LINE)
     canvas.setLineWidth(0.4)
     canvas.line(1.5 * cm, 1.4 * cm, PAGE_W - 1.5 * cm, 1.4 * cm)
@@ -199,7 +238,9 @@ def slide_chrome(canvas, doc):
     canvas.setFillColor(MUTED)
     canvas.drawString(1.5 * cm, 0.9 * cm,
                       "Atlas Nexus  ·  Presentación para Fiserv  ·  Mayo 2026")
-    canvas.drawRightString(PAGE_W - 1.5 * cm, 0.9 * cm, f"{doc.page}")
+    canvas.setFillColor(FISERV_NAVY)
+    canvas.setFont("Helvetica-Bold", 10)
+    canvas.drawRightString(PAGE_W - 2.3 * cm, 0.86 * cm, f"{doc.page}")
     canvas.restoreState()
 
 
@@ -219,15 +260,16 @@ def section_chrome(canvas, doc):
 
 def slide_cover():
     return [
-        Spacer(1, 4 * cm),
+        Spacer(1, 2.5 * cm),
         p("ATLAS NEXUS", COVER_TITLE),
         p("Inteligencia accionable para el merchant moderno.", COVER_SUB),
         Spacer(1, 0.4 * cm),
         p("IA conversacional · Forecasting con ML · Insights accionables · Smart Receipt 2.0",
           COVER_META),
+        Spacer(1, 0.2 * cm),
         p("Una capa de inteligencia agnóstica al POS, lista para distribuirse en el ecosistema Fiserv.",
           COVER_META),
-        Spacer(1, 5.2 * cm),
+        Spacer(1, 7 * cm),
         p("Mayo 2026  ·  Equipo Atlas Nexus  ·  Presentación para Fiserv",
           COVER_META),
     ]
@@ -304,6 +346,13 @@ def slide_what_is():
         p("“Un asesor de negocio que vive dentro del POS del comerciante, 24/7, "
           "que habla su idioma y le dice qué hacer hoy.”",
           QUOTE),
+        Spacer(1, 0.6 * cm),
+        chip_row([
+            ("Llama 3.3 70B  ·  Groq",          "#FF6B00", "#FFE9D6"),
+            ("XGBoost  ·  scikit-learn",        "#2563EB", "#DBEAFE"),
+            ("FastAPI  ·  PostgreSQL",          "#16A34A", "#DCFCE7"),
+            ("Server-Sent Events  ·  Tiempo real", "#8B5CF6", "#EDE9FE"),
+        ]),
     ]
 
 
@@ -764,9 +813,16 @@ def slide_value_levers():
         grid(stats, cols=4,
              col_widths=[6 * cm, 6 * cm, 6 * cm, 6 * cm],
              row_heights=[4.3 * cm]),
-        Spacer(1, 0.6 * cm),
+        Spacer(1, 0.5 * cm),
         p("<b>Tesis:</b> Fiserv monetizó pagos y hardware. El próximo escalón de valor para el merchant es la inteligencia sobre la data que ya genera. Atlas Nexus es esa capa.",
           LEAD),
+        Spacer(1, 0.3 * cm),
+        chip_row([
+            ("Ticket promedio",      "#FF6B00", "#FFE9D6"),
+            ("Retención de clientes","#2563EB", "#DBEAFE"),
+            ("Inventario optimizado","#16A34A", "#DCFCE7"),
+            ("Horas ahorradas",      "#E11D48", "#FEE2E2"),
+        ]),
     ]
 
 
@@ -851,6 +907,13 @@ def slide_onboarding():
         Spacer(1, 0.5 * cm),
         p("<b>Hoy (MVP):</b> registro web + sync manual con asistencia técnica. <b>Fase 3 (objetivo Fiserv):</b> el flujo de arriba, 100% autoservicio.",
           LEAD),
+        Spacer(1, 0.3 * cm),
+        chip_row([
+            ("Sin instalar nada",         "#FF6B00", "#FFE9D6"),
+            ("Sin contraseñas nuevas",    "#2563EB", "#DBEAFE"),
+            ("Sin intervención técnica",  "#16A34A", "#DCFCE7"),
+            ("< 5 min de cero a insight", "#8B5CF6", "#EDE9FE"),
+        ]),
     ]
 
 
