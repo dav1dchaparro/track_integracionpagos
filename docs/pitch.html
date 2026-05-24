@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas Nexus — Pitch Clover</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --clover-green: #00A85A;
+    --clover-green-dark: #007A40;
+    --clover-green-light: #E8F7EF;
+    --ink: #0E1A26;
+    --ink-soft: #2A3B4D;
+    --muted: #6B7A8A;
+    --line: #E5EAF0;
+    --card: #F7F9FC;
+  }
+  html, body { font-family: 'Inter', system-ui, sans-serif; }
+  .reveal { font-family: 'Inter', system-ui, sans-serif; font-size: 22px; color: var(--ink); }
+  .reveal .slides { text-align: left; }
+  .reveal .slides section {
+    padding: 40px 60px;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Bar at top */
+  .reveal .slides section.content::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 8px;
+    background: var(--clover-green);
+  }
+
+  /* Footer */
+  .reveal .slides section.content::after {
+    content: "Atlas Nexus  ·  Pitch para Clover  ·  Mayo 2026";
+    position: absolute;
+    bottom: 20px; left: 60px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .page-num {
+    position: absolute;
+    bottom: 20px; right: 60px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  /* Kicker */
+  .kicker {
+    color: var(--clover-green);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 20px;
+    margin-bottom: 12px;
+  }
+
+  /* Titles */
+  .reveal h1.title {
+    font-size: 92px;
+    font-weight: 800;
+    line-height: 1;
+    color: white;
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+  .reveal h2 {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    margin: 0 0 10px 0;
+    text-transform: none;
+  }
+  .reveal .subtitle {
+    font-size: 20px;
+    color: var(--ink-soft);
+    margin: 0 0 30px 0;
+    line-height: 1.4;
+  }
+
+  /* Cover */
+  section.cover {
+    background: var(--ink);
+    color: white;
+    padding: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  section.cover .left-bar {
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    width: 30px;
+    background: var(--clover-green);
+  }
+  section.cover .circle-1 {
+    position: absolute;
+    top: 60px; right: 100px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: var(--clover-green-dark);
+  }
+  section.cover .circle-2 {
+    position: absolute;
+    bottom: 60px; right: 140px;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: var(--clover-green);
+  }
+  section.cover .cover-inner {
+    position: relative;
+    z-index: 2;
+    margin-top: 120px;
+  }
+  section.cover .lede {
+    color: white;
+    font-size: 26px;
+    margin: 16px 0 60px 0;
+    max-width: 720px;
+    line-height: 1.3;
+  }
+  section.cover .meta {
+    color: rgba(255,255,255,0.75);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  section.cover .footer {
+    position: absolute;
+    bottom: 60px; left: 80px;
+    color: rgba(255,255,255,0.6);
+    font-size: 14px;
+  }
+
+  /* Divider */
+  section.divider {
+    background: var(--clover-green);
+    color: white;
+    padding: 80px;
+    display: flex;
+    align-items: center;
+  }
+  section.divider .kicker { color: white; opacity: 0.85; }
+  section.divider h2 {
+    color: white;
+    font-size: 72px;
+    letter-spacing: -0.03em;
+    max-width: 900px;
+  }
+
+  /* Cards grid */
+  .cards {
+    display: grid;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .cards.cols-2 { grid-template-columns: 1fr 1fr; }
+  .cards.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cards.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .card {
+    background: var(--card);
+    border-top: 4px solid var(--clover-green);
+    padding: 18px 20px;
+    border-radius: 4px;
+  }
+  .card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: var(--ink);
+  }
+  .card p {
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.45;
+    margin: 0;
+  }
+  .card.green-soft { background: #E8F7EF; }
+  .card.blue-soft { background: #E6EEF9; border-top-color: #2C68C9; }
+  .card.amber-soft { background: #FBF1D9; border-top-color: #D69E2E; }
+
+  /* Tables */
+  table.atlas {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 16px;
+  }
+  table.atlas thead th {
+    background: var(--ink);
+    color: white;
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+  table.atlas tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+  table.atlas tbody tr:nth-child(even) td { background: #FAFBFC; }
+  table.atlas .label {
+    color: var(--clover-green);
+    font-weight: 600;
+    width: 240px;
+  }
+
+  /* Pull quote */
+  .pullquote {
+    margin-top: 28px;
+    font-size: 22px;
+    color: var(--ink-soft);
+    font-style: italic;
+    line-height: 1.4;
+    border-left: 4px solid var(--clover-green);
+    padding-left: 16px;
+  }
+
+  /* Big stats row */
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 24px;
+    margin-top: 40px;
+  }
+  .stat {
+    text-align: center;
+    padding: 24px 12px;
+    border-top: 3px solid var(--line);
+  }
+  .stat .big {
+    font-size: 72px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 8px;
+  }
+  .stat .label {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.35;
+  }
+  .stat.c1 .big { color: var(--clover-green); }
+  .stat.c2 .big { color: #1E88E5; }
+  .stat.c3 .big { color: #E69500; }
+  .stat.c4 .big { color: #D63B6F; }
+
+  /* Pricing tiers */
+  .tiers {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 14px;
+    margin-top: 16px;
+  }
+  .tier {
+    padding: 18px;
+    border-radius: 4px;
+    border-top: 4px solid;
+  }
+  .tier h3 { font-size: 17px; margin: 0 0 8px 0; }
+  .tier p { font-size: 14px; margin: 0; line-height: 1.45; color: var(--ink-soft); }
+  .tier.t-free { background: #F4F6F8; border-top-color: #6B7A8A; }
+  .tier.t-pro { background: #E8F7EF; border-top-color: var(--clover-green); }
+  .tier.t-biz { background: #E6EEF9; border-top-color: #2C68C9; }
+  .tier.t-ent { background: #FBF1D9; border-top-color: #D69E2E; }
+
+  /* Roadmap rows */
+  .roadmap {
+    margin-top: 12px;
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 16px;
+  }
+  .roadmap td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .roadmap .phase {
+    background: var(--clover-green);
+    color: white;
+    font-weight: 700;
+    width: 110px;
+    text-align: center;
+  }
+  .roadmap .phase.alt { background: var(--clover-green-dark); }
+  .roadmap .time {
+    background: var(--ink);
+    color: white;
+    font-weight: 600;
+    width: 110px;
+    text-align: center;
+  }
+
+  /* Pieza por pieza dual layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 8px;
+  }
+  .two-col h3 {
+    font-size: 16px;
+    margin: 0 0 10px 0;
+    color: var(--ink);
+  }
+  .two-col ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+  }
+  .two-col ul li {
+    font-size: 15px;
+    padding: 5px 0 5px 18px;
+    position: relative;
+    color: var(--ink-soft);
+    line-height: 1.45;
+  }
+  .two-col ul li::before {
+    content: "·";
+    color: var(--clover-green);
+    font-weight: 800;
+    position: absolute;
+    left: 4px;
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  /* Architecture 3x3 */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .arch-cell {
+    background: var(--card);
+    padding: 14px 16px;
+    border-radius: 4px;
+    border-top: 4px solid var(--clover-green);
+  }
+  .arch-cell.row-2 { border-top-color: #2C68C9; }
+  .arch-cell.row-3 { border-top-color: #E69500; }
+  .arch-cell h3 { font-size: 15px; margin: 0 0 6px 0; }
+  .arch-cell p { font-size: 13px; color: var(--ink-soft); margin: 0; line-height: 1.4; }
+
+  /* Closing */
+  section.closing {
+    background: var(--ink);
+    color: white;
+    padding: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  section.closing .left-bar {
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    width: 30px;
+    background: var(--clover-green);
+  }
+  section.closing .circle-1 {
+    position: absolute;
+    top: 60px; right: 100px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: var(--clover-green-dark);
+  }
+  section.closing .circle-2 {
+    position: absolute;
+    bottom: 60px; right: 140px;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: var(--clover-green);
+  }
+  section.closing .inner {
+    position: relative;
+    z-index: 2;
+    margin-top: 120px;
+  }
+  section.closing h1 {
+    font-size: 130px;
+    font-weight: 800;
+    margin: 0;
+    color: white;
+    letter-spacing: -0.04em;
+  }
+  section.closing .sub {
+    font-size: 24px;
+    margin: 16px 0 60px 0;
+    color: rgba(255,255,255,0.85);
+  }
+  section.closing .cta {
+    font-size: 18px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* Stack table specific tweaks */
+  .stack-table { max-width: 850px; margin: 0 auto; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- 1. Cover -->
+<section class="cover">
+  <div class="left-bar"></div>
+  <div class="circle-1"></div>
+  <div class="circle-2"></div>
+  <div class="cover-inner">
+    <h1 class="title">ATLAS<br>NEXUS</h1>
+    <p class="lede">La capa de inteligencia que le falta al ecosistema Clover.</p>
+    <p class="meta">
+      IA conversacional  ·  Forecasting con ML  ·  Insights accionables<br>
+      Construido para merchants de Clover. Listo para el App Market.
+    </p>
+  </div>
+  <div class="footer">Mayo 2026  ·  Equipo Atlas Nexus</div>
+</section>
+
+<!-- 2. Problema -->
+<section class="content">
+  <div class="kicker">El problema</div>
+  <h2>El comerciante chico de Clover está sentado sobre data que no usa.</h2>
+  <p class="subtitle">4 dolores recurrentes que detectamos hablando con merchants reales.</p>
+  <div class="cards cols-2">
+    <div class="card">
+      <h3>El dashboard nativo es básico</h3>
+      <p>Clover muestra totales y exports a Excel. No le dice al comerciante <b>qué hacer</b> con esos números.</p>
+    </div>
+    <div class="card">
+      <h3>No hay IA conversacional</h3>
+      <p>Los merchants no pueden preguntar <i>"¿por qué bajaron mis ventas?"</i> y obtener una respuesta razonada con su data.</p>
+    </div>
+    <div class="card">
+      <h3>Sin predicciones de stock</h3>
+      <p>El comerciante chico no sabe cuánto comprar la semana que viene. Termina con faltantes o con plata frenada en inventario.</p>
+    </div>
+    <div class="card">
+      <h3>Clientes se van sin avisar</h3>
+      <p>El POS no detecta clientes en riesgo de churn ni sugiere acciones de retención.</p>
+    </div>
+  </div>
+  <div class="page-num">2 / 17</div>
+</section>
+
+<!-- 3. Qué es -->
+<section class="content">
+  <div class="kicker">Qué es Atlas Nexus</div>
+  <h2>Un acelerador de decisiones para merchants Clover.</h2>
+  <p class="subtitle">Tomamos las ventas, productos y clientes que ya están en Clover y los convertimos en respuestas y acciones — no en un reporte más.</p>
+  <div class="cards cols-3">
+    <div class="card">
+      <h3>IA Conversacional</h3>
+      <p><i>"¿Cuál es mi producto estrella esta semana?"</i> → respuesta en castellano, con los números reales del comercio.</p>
+    </div>
+    <div class="card">
+      <h3>Forecasting con XGBoost</h3>
+      <p>Predice demanda por producto a 7 días vista. Devuelve una lista de compras priorizada por urgencia.</p>
+    </div>
+    <div class="card">
+      <h3>Alertas accionables</h3>
+      <p>Clientes en riesgo, productos sin movimiento, días por encima del promedio, avance de meta mensual.</p>
+    </div>
+  </div>
+  <div class="pullquote">"Un asesor de negocio que vive dentro del Clover del comerciante, 24/7, que habla su idioma y le dice qué hacer hoy."</div>
+  <div class="page-num">3 / 17</div>
+</section>
+
+<!-- 4. MVP -->
+<section class="content">
+  <div class="kicker">Qué está construido hoy</div>
+  <h2>MVP funcional, demostrable y conectado a Clover.</h2>
+  <p class="subtitle">Web + Backend + ML + IA + Android parcial. Todo dockerizado.</p>
+  <div class="cards cols-3">
+    <div class="card"><h3>Dashboard en vivo</h3><p>KPIs, deltas vs período anterior, gráficos de método de pago, marca de tarjeta, timeline, top productos y top clientes.</p></div>
+    <div class="card"><h3>Briefing diario IA</h3><p>Al abrir la app: dato del día + insight + acción concreta. Llama 3.3 con contexto del comercio.</p></div>
+    <div class="card"><h3>Chat con tu negocio</h3><p>Preguntas libres en español con historial. La IA tiene los datos reales como contexto.</p></div>
+    <div class="card"><h3>Forecasting + Stock</h3><p>XGBoost cuando hay ≥4 semanas de data, fallback rolling-mean cuando hay menos. Confianza calibrada.</p></div>
+    <div class="card"><h3>Sync Clover (1 click)</h3><p>Botón único que importa las últimas órdenes. Webhook idempotente para nuevas ventas.</p></div>
+    <div class="card"><h3>Tiempo real (SSE)</h3><p>Las ventas nuevas aparecen sin recargar. Listo para pantalla de caja.</p></div>
+  </div>
+  <div class="page-num">4 / 17</div>
+</section>
+
+<!-- 5. Stack -->
+<section class="content">
+  <div class="kicker">Stack</div>
+  <h2>Una arquitectura moderna, simple y lista para escalar.</h2>
+  <p class="subtitle">Tecnologías elegidas por madurez del ecosistema y por costo operativo bajo en early-stage.</p>
+  <table class="atlas stack-table">
+    <tbody>
+      <tr><td class="label">Frontend</td><td>React 18  ·  Vite 5  ·  Tailwind CSS  ·  Recharts  ·  Lucide</td></tr>
+      <tr><td class="label">Backend</td><td>Python 3  ·  FastAPI 0.115  ·  SQLAlchemy 2.0  ·  Pydantic</td></tr>
+      <tr><td class="label">Base de datos</td><td>PostgreSQL 15 (UUID, ENUMs, índices únicos, FKs)</td></tr>
+      <tr><td class="label">Autenticación</td><td>JWT (HS256)  ·  bcrypt  ·  refresh con gracia</td></tr>
+      <tr><td class="label">IA conversacional</td><td>Groq SDK  ·  Llama 3.3 70B versatile  ·  prompts con data real</td></tr>
+      <tr><td class="label">Machine Learning</td><td>XGBoost 2.1  ·  scikit-learn  ·  pandas  ·  numpy</td></tr>
+      <tr><td class="label">Streaming</td><td>Server-Sent Events (sse-starlette)</td></tr>
+      <tr><td class="label">Integración POS</td><td>Cliente HTTP Clover REST v3 (httpx) + webhooks</td></tr>
+      <tr><td class="label">DevOps</td><td>Docker + docker-compose  ·  hot reload  ·  volúmenes</td></tr>
+      <tr><td class="label">Mobile</td><td>Android nativo  ·  Kotlin  ·  Gradle KTS</td></tr>
+    </tbody>
+  </table>
+  <div class="page-num">5 / 17</div>
+</section>
+
+<!-- 6. Integración Clover -->
+<section class="content">
+  <div class="kicker">Integración Clover  ·  Estado actual</div>
+  <h2>Ya leemos ventas reales de Clover.</h2>
+  <p class="subtitle">Single-tenant. Pull + webhook. Idempotente. Mapeo limpio.</p>
+  <div class="two-col">
+    <div>
+      <h3>Integración Clover hoy</h3>
+      <p style="font-size:14px;color:var(--ink-soft);margin:0 0 10px 0;">Conectados al merchant de Clover con dos canales:</p>
+      <ul>
+        <li><b>Pull manual</b> con un botón <i>Sync Clover</i>: trae las últimas N órdenes con <code>?expand=lineItems,payments</code> y las inserta idempotentemente.</li>
+        <li><b>Webhook</b> en <code>POST /clover/webhook</code>: recibe el evento y va a buscar la orden completa.</li>
+        <li><b>Mapeo</b> orden Clover → Sale + SaleItems de Atlas, con auto-creación de productos por nombre.</li>
+        <li><b>Conversión correcta</b> de centavos y unitQty de Clover a precio y cantidad.</li>
+        <li><b>Detección de método de pago</b>: card (con type/brand) o QR.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Pieza por pieza</h3>
+      <table class="atlas">
+        <tbody>
+          <tr><td class="label">Endpoint Clover</td><td><code>GET /v3/merchants/{mid}/orders</code></td></tr>
+          <tr><td class="label">Auth</td><td>Bearer token (1 merchant en .env)</td></tr>
+          <tr><td class="label">Webhook objeto</td><td>{type, objectId}</td></tr>
+          <tr><td class="label">Idempotencia</td><td>clover_order_id UNIQUE en sales</td></tr>
+          <tr><td class="label">Manejo duplicados</td><td>skipped si ya estaba importada</td></tr>
+          <tr><td class="label">Modelo final</td><td>Sale + items, listos para BI/IA/ML</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="page-num">6 / 17</div>
+</section>
+
+<!-- 7. Divider -->
+<section class="divider">
+  <div>
+    <div class="kicker">Parte 2</div>
+    <h2>Cómo vinculamos esto a Clover de verdad.</h2>
+  </div>
+</section>
+
+<!-- 8. 4 movimientos -->
+<section class="content">
+  <div class="kicker">Cómo vinculamos esto a Clover de verdad</div>
+  <h2>De integración local a app distribuida en el App Market.</h2>
+  <p class="subtitle">4 movimientos técnico-comerciales para convertir el MVP en una app productiva del ecosistema.</p>
+  <div class="cards cols-2">
+    <div class="card">
+      <h3>1  ·  OAuth v2 de Clover</h3>
+      <p>Reemplazar el token único en .env por el flujo OAuth de Clover. El merchant instala la app desde su terminal y autoriza scopes (READ_ORDERS, READ_CUSTOMERS, READ_INVENTORY, WRITE_INVENTORY). Tokens persistidos por merchant en la base.</p>
+    </div>
+    <div class="card">
+      <h3>2  ·  Firma HMAC en webhooks</h3>
+      <p>Validar la firma de cada webhook usando el secret del partner. Sin firma válida, rechazo automático. Esto cierra el agujero de ventas falsas.</p>
+    </div>
+    <div class="card">
+      <h3>3  ·  Sincronización completa</h3>
+      <p>Hoy: solo orders. Sumamos inventory (bidireccional), customers (customer DB), employees (reportes por vendedor) y refunds/voids.</p>
+    </div>
+    <div class="card">
+      <h3>4  ·  Publicación en Clover App Market</h3>
+      <p>Onboarding desde la terminal Clover, billing manejado por Clover (split 70/30), trial configurable (14/30/60/90 días), prorrateo automático.</p>
+    </div>
+  </div>
+  <div class="page-num">8 / 17</div>
+</section>
+
+<!-- 9. Arquitectura objetivo -->
+<section class="content">
+  <div class="kicker">Arquitectura objetivo</div>
+  <h2>Tres capas. Conexión nativa al ecosistema Clover.</h2>
+  <p class="subtitle">Diseñada para multi-tenant desde el día 1, lista para escalar dentro del App Market.</p>
+  <div class="arch-grid">
+    <div class="arch-cell"><h3>Clover Merchant</h3><p>Terminal Flex / Mini / Station. Hace ventas, voids, refunds.</p></div>
+    <div class="arch-cell"><h3>Clover REST API</h3><p>GET orders  ·  GET customers  ·  inventory  ·  employees  ·  webhooks firmados</p></div>
+    <div class="arch-cell"><h3>Clover App Market</h3><p>OAuth v2  ·  Billing  ·  Distribución a la base instalada</p></div>
+
+    <div class="arch-cell row-2"><h3>Atlas API (FastAPI)</h3><p>Routers: auth  ·  sales  ·  dashboard  ·  insights  ·  forecasting  ·  clover</p></div>
+    <div class="arch-cell row-2"><h3>Servicios</h3><p>clover_service  ·  ml_forecasting  ·  event_manager  ·  auth</p></div>
+    <div class="arch-cell row-2"><h3>Postgres</h3><p>users  ·  sales  ·  sale_items  ·  products  ·  stock  ·  predictions</p></div>
+
+    <div class="arch-cell row-3"><h3>Capa IA / ML</h3><p>Groq + Llama 3.3 (insights)  ·  XGBoost (forecasting)  ·  scikit-learn (futuro RFM/MBA)</p></div>
+    <div class="arch-cell row-3"><h3>Frontend Web (React)</h3><p>Dashboard  ·  Insights  ·  Forecasting  ·  Products  ·  Settings</p></div>
+    <div class="arch-cell row-3"><h3>App Android (Kotlin)</h3><p>Login + dashboard  ·  roadmap fase 1 completa</p></div>
+  </div>
+  <div class="page-num">9 / 17</div>
+</section>
+
+<!-- 10. Diferenciación -->
+<section class="content">
+  <div class="kicker">Diferenciación en el App Market</div>
+  <h2>Lo que nadie está haciendo bien dentro del ecosistema.</h2>
+  <p class="subtitle">Las apps actuales son reportes glorificados. Nosotros somos un asesor con IA + ML real.</p>
+  <table class="atlas">
+    <thead>
+      <tr><th></th><th>Apps típicas del App Market</th><th>Atlas Nexus</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="label">Reportes</td><td>Export a Excel / dashboards estáticos</td><td><b>Dashboard con deltas y benchmarks vs período previo</b></td></tr>
+      <tr><td class="label">IA</td><td>Ninguna / chatbots genéricos</td><td><b>IA con contexto real del comercio (Llama 3.3)</b></td></tr>
+      <tr><td class="label">Forecasting</td><td>No tienen</td><td><b>XGBoost por producto, semanal, con confianza calibrada</b></td></tr>
+      <tr><td class="label">Retención</td><td>Listas de clientes</td><td><b>Detección automática de churn + acción sugerida</b></td></tr>
+      <tr><td class="label">Recomendaciones</td><td>—</td><td><b>Lista de compras priorizada + alertas semáforo</b></td></tr>
+      <tr><td class="label">Idioma</td><td>Inglés first</td><td><b>Español first (LATAM)</b></td></tr>
+    </tbody>
+  </table>
+  <div class="page-num">10 / 17</div>
+</section>
+
+<!-- 11. 4 palancas -->
+<section class="content">
+  <div class="kicker">Valor para el merchant</div>
+  <h2>4 palancas que se traducen en plata.</h2>
+  <p class="subtitle">Cada feature está pensada para mover un número del merchant, no para verse linda.</p>
+  <div class="cards cols-2">
+    <div class="card"><h3>Subir el ticket promedio</h3><p>Recomendaciones de combos (Market Basket Analysis con Apriori/FP-Growth) + sugerencias proactivas en el punto de venta.</p></div>
+    <div class="card"><h3>Reducir el churn de clientes</h3><p>Detección automática de clientes que dejaron de comprar + sugerencia de promo personalizada.</p></div>
+    <div class="card"><h3>Optimizar inventario</h3><p>Lista de compras semanal con confianza y alertas semáforo. Menos faltantes, menos capital frenado.</p></div>
+    <div class="card"><h3>Ahorrar horas de análisis</h3><p>Briefing diario en 2 oraciones reemplaza horas de exportar a Excel y armar tablas dinámicas.</p></div>
+  </div>
+  <div class="page-num">11 / 17</div>
+</section>
+
+<!-- 12. Roadmap -->
+<section class="content">
+  <div class="kicker">Roadmap</div>
+  <h2>De MVP single-tenant a app del Clover App Market.</h2>
+  <p class="subtitle">Plan en 6 fases concatenadas. La fase 3 es la que nos pone en producción dentro de Clover.</p>
+  <table class="roadmap">
+    <tr><td class="phase">Fase 1</td><td>Cerrar app Android (Productos, Ventas, Insights, Forecasting, push)</td><td class="time">1–2 sem</td></tr>
+    <tr><td class="phase alt">Fase 2</td><td>Hardening: HMAC en webhook, OAuth, CI, tests, reset password, observabilidad</td><td class="time">2–3 sem</td></tr>
+    <tr><td class="phase">Fase 3</td><td>Multi-tenant + publicación en Clover App Market + sync completo</td><td class="time">3–4 sem</td></tr>
+    <tr><td class="phase alt">Fase 3.5</td><td>ML avanzado: Market Basket, RFM, Churn predictivo, anomalías</td><td class="time">1–2 sem</td></tr>
+    <tr><td class="phase">Fase 4</td><td>IA proactiva, precios dinámicos, fraude, IA por voz, generador de promos</td><td class="time">1–2 meses</td></tr>
+    <tr><td class="phase alt">Fase 5</td><td>WhatsApp Business, loyalty, mini-ecommerce, capital de trabajo, facturación electrónica</td><td class="time">2–3 meses</td></tr>
+  </table>
+  <div class="page-num">12 / 17</div>
+</section>
+
+<!-- 13. Pricing -->
+<section class="content">
+  <div class="kicker">Modelo de negocio</div>
+  <h2>Pricing pensado para escalar dentro del App Market.</h2>
+  <p class="subtitle">Free para captar, Pro para monetizar, Business para retener, Enterprise para crecimiento ARPU.</p>
+  <div class="tiers">
+    <div class="tier t-free"><h3>Free</h3><p>Dashboard básico  ·  hasta 100 ventas/mes  ·  sin IA  ·  ideal para onboarding viral.</p></div>
+    <div class="tier t-pro"><h3>Pro  ·  $29/mes</h3><p>IA conversacional  ·  forecasting  ·  alertas  ·  sin límite de ventas.</p></div>
+    <div class="tier t-biz"><h3>Business  ·  $99/mes</h3><p>Todo Pro + multi-local  ·  multi-usuario  ·  roles  ·  integraciones.</p></div>
+    <div class="tier t-ent"><h3>Enterprise</h3><p>Precio a medida  ·  soporte dedicado  ·  onboarding asistido.</p></div>
+  </div>
+  <p style="margin-top:32px;font-size:16px;color:var(--ink-soft);"><b>Split Clover:</b> 70/30 (nosotros / Clover) sobre el revenue de la app. <b>Billing</b> manejado por Clover, sin que tengamos que tocar tarjetas ni AR. Trials de 14 a 90 días configurables.</p>
+  <div class="page-num">13 / 17</div>
+</section>
+
+<!-- 14. Oportunidad -->
+<section class="content">
+  <div class="kicker">La oportunidad</div>
+  <h2>Por qué Clover, por qué ahora.</h2>
+  <p class="subtitle">App Market maduro, base instalada cautiva, gap evidente en analytics + IA.</p>
+  <div class="stats">
+    <div class="stat c1"><div class="big">100k+</div><div class="label">merchants activos<br>en Clover (EEUU + LATAM)</div></div>
+    <div class="stat c2"><div class="big">0.1%</div><div class="label">captura objetivo<br>en 12 meses</div></div>
+    <div class="stat c3"><div class="big">$29–99</div><div class="label">ARPU mensual<br>según tier</div></div>
+    <div class="stat c4"><div class="big">70/30</div><div class="label">split revenue<br>App Market</div></div>
+  </div>
+  <p style="margin-top:40px;font-size:18px;color:var(--ink-soft);line-height:1.5;"><b>Tesis:</b> Clover monetizó el hardware y los pagos. El próximo escalón de valor para el merchant es la inteligencia sobre la data que ya genera. Atlas Nexus es esa capa, lista para distribuirse.</p>
+  <div class="page-num">14 / 17</div>
+</section>
+
+<!-- 15. Pasos futuros -->
+<section class="content">
+  <div class="kicker">Pasos futuros que nos llevan al App Market</div>
+  <h2>Una hoja de ruta concreta, no aspiracional.</h2>
+  <p class="subtitle">Cada hito tiene entregable visible y métrica asociada.</p>
+  <div class="cards cols-2">
+    <div class="card"><h3>Próximos 30 días</h3><p>Hardening de seguridad (HMAC, CORS, JWT)  ·  Alembic real  ·  CI/CD básico  ·  suite de tests E2E.</p></div>
+    <div class="card"><h3>60 días</h3><p>OAuth v2 con Clover  ·  multi-tenant con business_id  ·  refresh tokens por merchant  ·  scopes mínimos.</p></div>
+    <div class="card"><h3>90 días</h3><p>Submission al Clover App Market  ·  pricing en consola Clover  ·  trial configurable  ·  onboarding &lt; 5 min.</p></div>
+    <div class="card"><h3>120+ días</h3><p>ML avanzado: Market Basket (Apriori/FP-Growth), RFM + KMeans, Churn predictivo, anomalías (Isolation Forest).</p></div>
+  </div>
+  <div class="page-num">15 / 17</div>
+</section>
+
+<!-- 16. Lo que necesitamos -->
+<section class="content">
+  <div class="kicker">Lo que necesitamos de Clover</div>
+  <h2>3 colaboraciones concretas para acelerar el go-to-market.</h2>
+  <p class="subtitle">Lo demás lo construimos nosotros.</p>
+  <div class="cards cols-3">
+    <div class="card"><h3>Acceso temprano a partner tools</h3><p>Sandbox de desarrollo, documentación OAuth v2 y guidelines de App Market review.</p></div>
+    <div class="card"><h3>Pilotos guiados</h3><p>5–10 merchants reales para validar onboarding &lt; 5 min y medir lift en ticket promedio + retención.</p></div>
+    <div class="card"><h3>Co-marketing post-launch</h3><p>Featured listing en App Market durante el launch, case study conjunto, sesión en Clover Connect.</p></div>
+  </div>
+  <div class="page-num">16 / 17</div>
+</section>
+
+<!-- 17. Closing -->
+<section class="closing">
+  <div class="left-bar"></div>
+  <div class="circle-1"></div>
+  <div class="circle-2"></div>
+  <div class="inner">
+    <h1>GRACIAS</h1>
+    <p class="sub">Atlas Nexus — la capa de inteligencia del ecosistema Clover.</p>
+    <p class="cta">¿Conversamos sobre el siguiente paso?</p>
+  </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    width: 1280,
+    height: 800,
+    margin: 0,
+    controls: true,
+    progress: true,
+    slideNumber: false,
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    keyboard: true,
+    touch: true,
+  });
+</script>
+</body>
+</html>
