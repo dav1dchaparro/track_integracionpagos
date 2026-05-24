@@ -78,3 +78,20 @@ def update_goal(
     db.commit()
     db.refresh(user)
     return {"monthly_goal": float(user.monthly_goal)}
+
+
+class ReviewUrlUpdate(BaseModel):
+    google_review_url: str | None = None
+
+
+@router.put("/me/review-url")
+def update_review_url(
+    data: ReviewUrlUpdate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user.google_review_url = data.google_review_url
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return {"google_review_url": user.google_review_url}

@@ -11,8 +11,9 @@ import PurchasePatterns from './pages/PurchasePatterns'
 import Insights from './pages/Insights'
 import Categories from './pages/Categories'
 import Products from './pages/Products'
+import ReceiptMicrosite from './pages/ReceiptMicrosite'
 
-function AppInner() {
+function AuthenticatedApp() {
   const { user } = useAuth()
   const [darkMode, setDarkMode] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -57,6 +58,18 @@ function AppInner() {
         </div>
       </div>
     </div>
+  )
+}
+
+function AppInner() {
+  return (
+    <Routes>
+      {/* Public route — receipt microsite, no auth required */}
+      <Route path="/r/:token" element={<ReceiptMicrosite />} />
+
+      {/* Everything else goes through the authenticated shell */}
+      <Route path="*" element={<AuthenticatedApp />} />
+    </Routes>
   )
 }
 

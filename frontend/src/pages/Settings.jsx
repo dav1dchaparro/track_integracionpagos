@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { User, Target, Save, Store, Mail, Calendar, Loader2 } from 'lucide-react'
+import { User, Target, Save, Store, Mail, Calendar, Loader2, QrCode, Star, ExternalLink } from 'lucide-react'
 import { apiFetch } from '../context/AuthContext'
 
 export default function Settings() {
@@ -11,15 +11,61 @@ export default function Settings() {
   const [savingGoal, setSavingGoal] = useState(false)
   const [goalSaved, setGoalSaved] = useState(false)
 
+  const [reviewInput, setReviewInput] = useState('')
+  const [savingReview, setSavingReview] = useState(false)
+  const [reviewSaved, setReviewSaved] = useState(false)
+
+  const [demoQr, setDemoQr] = useState(null)
+  const [demoLoading, setDemoLoading] = useState(false)
+  const [demoError, setDemoError] = useState(null)
+
   useEffect(() => {
     apiFetch('/auth/me')
       .then((data) => {
         setProfile(data)
         setGoalInput(data.monthly_goal ? String(data.monthly_goal) : '')
+        setReviewInput(data.google_review_url || '')
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [])
+
+  const saveReviewUrl = async () => {
+    setSavingReview(true)
+    setReviewSaved(false)
+    try {
+      const result = await apiFetch('/auth/me/review-url', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ google_review_url: reviewInput.trim() || null }),
+      })
+      setProfile((prev) => ({ ...prev, google_review_url: result.google_review_url }))
+      setReviewSaved(true)
+      setTimeout(() => setReviewSaved(false), 2500)
+    } catch (err) {
+      setError(err.message)
+    }
+    setSavingReview(false)
+  }
+
+  const generateDemoQr = async () => {
+    setDemoLoading(true)
+    setDemoError(null)
+    setDemoQr(null)
+    try {
+      const sales = await apiFetch('/sales/?limit=1')
+      if (!sales?.length) {
+        setDemoError('No tenés ventas todavía. Generá una primero.')
+        return
+      }
+      const publicHost = encodeURIComponent(window.location.origin)
+      const qr = await apiFetch(`/receipts/${sales[0].id}/qr?public_host=${publicHost}`)
+      setDemoQr(qr)
+    } catch (err) {
+      setDemoError(err.message)
+    }
+    setDemoLoading(false)
+  }
 
   const saveGoal = async () => {
     const val = parseFloat(goalInput)
@@ -176,6 +222,118 @@ export default function Settings() {
             <p className="text-xs text-gray-400 mt-3">
               Meta actual: <span className="font-bold text-gray-600 dark:text-gray-300">${Number(profile.monthly_goal).toLocaleString()}</span>
             </p>
+          )}
+        </div>
+
+        {/* Smart Receipt 2.0 — Google review URL */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <div
+              className="w-7 h-7 rounded-lg flex items-center justify-center"
+              style={{ background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.25)' }}
+            >
+              <Star className="w-4 h-4 text-yellow-500" />
+            </div>
+            <span className="text-sm font-bold text-gray-900 dark:text-white">Smart Receipt — link de Google Review</span>
+          </div>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            Pegá tu URL de reseñas de Google. Cada ticket llevará un QR que lleva al cliente a este link con un click. Se hace en
+            <span className="font-bold"> Google Maps → tu negocio → Compartir → "Acortar URL"</span>.
+          </p>
+
+          <div className="flex gap-3 items-center">
+            <input
+              type="url"
+              value={reviewInput}
+              onChange={(e) => setReviewInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && saveReviewUrl()}
+              placeholder="https://g.page/r/..."
+              className="flex-1 px-3 py-2.5 rounded-xl text-sm border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white outline-none focus:border-yellow-500 transition-colors"
+            />
+            <button
+              onClick={saveReviewUrl}
+              disabled={savingReview}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-50"
+              style={{ background: reviewSaved ? '#16a34a' : '#eab308' }}
+            >
+              {savingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              {reviewSaved ? 'Guardado' : savingReview ? 'Guardando...' : 'Guardar'}
+            </button>
+          </div>
+
+          {profile.google_review_url && (
+            <a
+              href={profile.google_review_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 mt-3 text-xs text-yellow-600 hover:underline"
+            >
+              Probar link actual <ExternalLink className="w-3 h-3" />
+            </a>
+          )}
+        </div>
+
+        {/* Smart Receipt 2.0 — Demo QR */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <div
+              className="w-7 h-7 rounded-lg flex items-center justify-center"
+              style={{ background: 'rgba(0,230,118,0.1)', border: '1px solid rgba(0,230,118,0.2)' }}
+            >
+              <QrCode className="w-4 h-4" style={{ color: '#00e676' }} />
+            </div>
+            <span className="text-sm font-bold text-gray-900 dark:text-white">Probar el Smart Receipt</span>
+          </div>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            Generá el QR de la última venta y escaneá con tu celular para ver el microsite que vería tu cliente.
+          </p>
+
+          <button
+            onClick={generateDemoQr}
+            disabled={demoLoading}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-50"
+            style={{ background: '#00b25c' }}
+          >
+            {demoLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <QrCode className="w-4 h-4" />}
+            {demoLoading ? 'Generando...' : 'Generar QR de prueba'}
+          </button>
+
+          {demoError && (
+            <p className="text-xs text-red-500 mt-3">{demoError}</p>
+          )}
+
+          {demoQr && (
+            <div className="mt-5 flex flex-col sm:flex-row items-start gap-5 p-4 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700">
+              <img
+                src={demoQr.qr_data_uri}
+                alt="QR del recibo"
+                className="w-44 h-44 rounded-lg bg-white p-2 shadow-sm flex-shrink-0"
+              />
+              <div className="flex-1 min-w-0 space-y-2">
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide font-bold text-gray-400">URL del microsite</p>
+                  <a
+                    href={demoQr.microsite_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-sm font-semibold text-green-600 hover:underline break-all"
+                  >
+                    {demoQr.microsite_url} <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                  </a>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide font-bold text-gray-400">Expira</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    {new Date(demoQr.expires_at).toLocaleString('es-AR')}
+                  </p>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 pt-1">
+                  📲 Escaneá con la cámara de tu celular o tocá el link arriba.
+                </p>
+              </div>
+            </div>
           )}
         </div>
       </div>
