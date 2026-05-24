@@ -14,7 +14,7 @@ class Sale(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"))
     invoice_number: Mapped[str] = mapped_column(String(100))
-    payment_method: Mapped[str] = mapped_column(SAEnum("card", "qr", name="payment_method_enum"))
+    payment_method: Mapped[str] = mapped_column(SAEnum("card", "qr", "cash", name="payment_method_enum"))
     card_type: Mapped[str | None] = mapped_column(SAEnum("credit", "debit", name="card_type_enum"), nullable=True)
     card_brand: Mapped[str | None] = mapped_column(SAEnum("visa", "mastercard", "amex", name="card_brand_enum"), nullable=True)
     card_category: Mapped[str | None] = mapped_column(SAEnum(
@@ -23,6 +23,7 @@ class Sale(Base):
         name="card_category_enum",
     ), nullable=True)
     customer_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    customer_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("customers.id"), nullable=True)
     clover_order_id: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True)
     total: Mapped[float] = mapped_column(Numeric(12, 2))
     sold_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

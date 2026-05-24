@@ -101,19 +101,23 @@ async def chat(
         "today": "hoy", "week": "esta semana", "month": "este mes", "year": "este año"
     }.get(req.period, req.period)
 
-    system_prompt = f"""Eres un asistente de negocios para merchants que usan Clover POS.
-Datos del negocio "{user.store_name}" ({period_label}):
-- Revenue total: ${total_revenue:.2f}
-- Total ventas: {total_orders}
-- Ticket promedio: ${avg_ticket:.2f}
-- Métodos de pago: {pm_str}
-- Productos top: {top_products_str}
-- Clientes únicos identificados: {unique_customers}
-- Tasa de retorno de clientes: {return_rate}%
-- Clientes más frecuentes: {top_customers_str}
+    system_prompt = f"""Sos un asesor de comercio que habla simple, como un amigo que entiende de negocios chicos.
+Datos del comercio "{user.store_name}" ({period_label}):
+- Total vendido: ${total_revenue:.2f}
+- Cantidad de ventas: {total_orders}
+- Lo que gasta en promedio cada cliente: ${avg_ticket:.2f}
+- Cómo le pagaron: {pm_str}
+- Lo que más se vendió: {top_products_str}
+- Clientes distintos que compraron: {unique_customers}
+- Cuántos volvieron a comprar: {return_rate}%
+- Los que más vuelven: {top_customers_str}
 
-Usa los datos de clientes para dar consejos de retención personalizados cuando sea relevante.
-Responde en español, de forma concisa y accionable. Máximo 3 párrafos cortos."""
+Reglas de lenguaje:
+- Nada de jerga: prohibido decir "revenue", "ticket promedio", "KPI", "churn", "engagement", "performance", "insight", "merchant", "retention", "forecast".
+- Hablá rioplatense simple, como hablarías en un kiosco o un café de barrio.
+- "Ventas" en vez de "revenue", "lo que gasta cada cliente" en vez de "ticket promedio", "clientes que vuelven" en vez de "retention".
+- Cuando sugieras algo, decí "probá hacer X" o "te conviene Y", no "implementá una estrategia".
+- Respuestas cortas y al pie: máximo 3 párrafos chiquitos."""
 
     client = Groq(api_key=settings.groq_api_key)
     completion = client.chat.completions.create(
@@ -165,17 +169,21 @@ async def briefing(
     at_risk = sum(1 for d in customer_last.values() if d < fourteen_days_ago)
 
     goal_context = (
-        f"Meta mensual del negocio: ${float(user.monthly_goal):.2f}, revenue actual del mes: ${month_revenue:.2f} ({month_revenue / float(user.monthly_goal) * 100:.0f}% completado)."
+        f"Meta del mes: ${float(user.monthly_goal):.2f}. Lleva vendido este mes: ${month_revenue:.2f} ({month_revenue / float(user.monthly_goal) * 100:.0f}% de la meta)."
         if user.monthly_goal else ""
     )
 
-    system_prompt = f"""Eres un coach de negocios para pequeñas empresas emergentes que usan Clover POS.
-Genera un briefing motivador y accionable en exactamente 2-3 oraciones cortas para el dueño de "{user.store_name}".
-Estructura: 1 dato concreto del día, 1 insight de oportunidad o riesgo, 1 acción específica que puede tomar HOY.
+    system_prompt = f"""Sos un asesor de negocios que habla simple, como un amigo que entiende de comercio.
+Le escribís al dueño de "{user.store_name}" un resumen del día en 2-3 oraciones cortas.
+Estructura: 1 dato concreto del día, 1 oportunidad o algo a tener en cuenta, 1 acción concreta que puede hacer HOY.
 {goal_context}
-Sé directo, empático y orientado al crecimiento. Responde en español."""
+Reglas de lenguaje:
+- Nada de jerga técnica: prohibido decir "insight", "KPI", "churn", "engagement", "performance", "revenue", "lift", "uplift", "baseline", "forecast", "win-back".
+- Hablá en español rioplatense, simple, como en un kiosco o un café de barrio.
+- Decí "ventas" en vez de "revenue", "clientes que no vuelven" en vez de "churn", "lo que más se está vendiendo" en vez de "top performer", "probá hacer X" en vez de "implementá una estrategia".
+- Directo, sin floreo. Cero palabras en inglés salvo que sea el nombre de un producto."""
 
-    user_msg = f"Revenue hoy: ${today_revenue:.2f} | Ventas hoy: {today_orders} | Clientes sin comprar en 14+ días: {at_risk} | Revenue del mes: ${month_revenue:.2f}"
+    user_msg = f"Ventas de hoy: ${today_revenue:.2f} | Cantidad de ventas hoy: {today_orders} | Clientes que no vuelven hace 14+ días: {at_risk} | Total vendido este mes: ${month_revenue:.2f}"
 
     client = Groq(api_key=settings.groq_api_key)
     completion = client.chat.completions.create(
@@ -212,8 +220,8 @@ def alerts(
         result.append({
             "type": "at_risk_customers",
             "level": "warning",
-            "title": f"{at_risk_count} cliente{'s' if at_risk_count > 1 else ''} en riesgo",
-            "message": f"No {'han' if at_risk_count > 1 else 'ha'} comprado en más de 14 días. Considera enviar una promoción.",
+            "title": f"{at_risk_count} cliente{'s' if at_risk_count > 1 else ''} hace rato que no vuelve{'n' if at_risk_count > 1 else ''}",
+            "message": f"Hace más de 14 días que no {'compran' if at_risk_count > 1 else 'compra'}. Mandales una promo para que se acuerden de vos.",
         })
 
     # 2. Daily milestone: today revenue > 120% of daily avg last 7 days
@@ -235,8 +243,8 @@ def alerts(
         result.append({
             "type": "daily_milestone",
             "level": "success",
-            "title": "¡Día por encima del promedio!",
-            "message": f"Hoy llevas ${today_revenue:.0f}, un {pct}% más que tu promedio diario de los últimos 7 días.",
+            "title": "Buen día de ventas",
+            "message": f"Llevás vendido ${today_revenue:.0f}. Es un {pct}% más que un día normal de la semana pasada.",
         })
 
     # 3. Slow products: sold in last 30d but not last 7d
@@ -267,8 +275,8 @@ def alerts(
         result.append({
             "type": "slow_product",
             "level": "info",
-            "title": f"{len(slow)} producto{'s' if len(slow) > 1 else ''} sin ventas recientes",
-            "message": f'"{", ".join(names)}"{extra} no se {"han" if len(slow) > 1 else "ha"} vendido en 7 días.',
+            "title": f"{len(slow)} producto{'s' if len(slow) > 1 else ''} sin moverse hace una semana",
+            "message": f'"{", ".join(names)}"{extra} no se {"vendieron" if len(slow) > 1 else "vendió"} en los últimos 7 días. Probá ponerlos a la vista o hacer una promo.',
         })
 
     # 4. Goal progress alerts
@@ -283,15 +291,15 @@ def alerts(
             result.append({
                 "type": "goal_achieved",
                 "level": "success",
-                "title": "¡Meta mensual superada!",
-                "message": f"Alcanzaste el {pct:.0f}% de tu meta de ${user.monthly_goal:.0f}. ¡Considera aumentarla!",
+                "title": "¡Le pegaste a la meta del mes!",
+                "message": f"Vas {pct:.0f}% de tu meta de ${user.monthly_goal:.0f}. El mes que viene poné una un poco más alta.",
             })
         elif pct >= 75:
             result.append({
                 "type": "goal_near",
                 "level": "info",
-                "title": "Cerca de tu meta mensual",
-                "message": f"Llevas el {pct:.0f}% de tu meta de ${user.monthly_goal:.0f}. ¡Ya casi!",
+                "title": "Estás cerca de la meta del mes",
+                "message": f"Vas {pct:.0f}% de tu meta de ${user.monthly_goal:.0f}. Falta poquito.",
             })
 
     return {"alerts": result}

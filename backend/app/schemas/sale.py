@@ -8,6 +8,7 @@ from pydantic import BaseModel
 class PaymentMethod(str, Enum):
     card = "card"
     qr = "qr"
+    cash = "cash"
 
 
 class CardType(str, Enum):

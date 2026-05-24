@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +45,7 @@ import com.cloveriamarketing.ui.viewmodel.DashboardViewModel
 @Composable
 fun DashboardScreen(
     onLogout: () -> Unit,
+    onOpenCheckoutAssistant: () -> Unit = {},
     dashboardViewModel: DashboardViewModel = viewModel()
 ) {
     // ── Colores ─────────────────────────────────────────────────
@@ -93,6 +95,15 @@ fun DashboardScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = cardBg)
+            )
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = onOpenCheckoutAssistant,
+                containerColor = accentColor,
+                contentColor = Color.White,
+                icon = { Icon(Icons.Default.ShoppingCart, contentDescription = null) },
+                text = { Text("Asistente de checkout", fontWeight = FontWeight.SemiBold, fontSize = 13.sp) }
             )
         },
         containerColor = darkBg
@@ -518,11 +529,13 @@ private fun DashboardContent(
                             val icon = when (method) {
                                 "card" -> "💳"
                                 "qr" -> "📱"
+                                "cash" -> "💵"
                                 else -> "💰"
                             }
                             val label = when (method) {
                                 "card" -> "Tarjeta"
                                 "qr" -> "QR"
+                                "cash" -> "Efectivo"
                                 else -> method.uppercase()
                             }
                             Row(

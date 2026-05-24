@@ -27,6 +27,9 @@ from app.models.sale_item import SaleItem
 warnings.filterwarnings("ignore")
 
 MIN_WEEKS_FOR_ML = 4
+TOP_N_PRODUCTS = 100  # solo los más vendidos pasan al modelo — el long tail no aporta
+_FORECAST_CACHE: dict = {}  # { user_id: (timestamp, payload) }
+_FORECAST_TTL_SECONDS = 600  # 10 minutos
 
 FEATURE_COLS = [
     "product_enc",
@@ -50,7 +53,20 @@ def _get_weekly_sales(db: Session, user_id: uuid.UUID) -> pd.DataFrame:
     """
     Returns a DataFrame with weekly aggregated sales per product.
     Columns: product_id (str), week_start (datetime), quantity (int).
+
+    Solo trae los TOP_N_PRODUCTS más vendidos. El long-tail (productos con 1-2
+    ventas en el año) no aporta decisiones de compra y duplica el costo del fit.
     """
+    top_products_subq = (
+        select(SaleItem.product_id)
+        .join(Sale, Sale.id == SaleItem.sale_id)
+        .where(Sale.user_id == user_id)
+        .group_by(SaleItem.product_id)
+        .order_by(func.sum(SaleItem.subtotal).desc())
+        .limit(TOP_N_PRODUCTS)
+        .subquery()
+    )
+
     rows = db.execute(
         select(
             SaleItem.product_id,
@@ -59,6 +75,7 @@ def _get_weekly_sales(db: Session, user_id: uuid.UUID) -> pd.DataFrame:
         )
         .join(Sale, Sale.id == SaleItem.sale_id)
         .where(Sale.user_id == user_id)
+        .where(SaleItem.product_id.in_(select(top_products_subq.c.product_id)))
         .group_by(SaleItem.product_id, func.date_trunc("week", Sale.sold_at))
         .order_by(func.date_trunc("week", Sale.sold_at))
     ).all()
@@ -224,17 +241,22 @@ def _alert_level(recommended: int, predicted: int) -> str:
 # Main entry point
 # ---------------------------------------------------------------------------
 
-def run_forecast(db: Session, user_id: uuid.UUID) -> dict:
+def run_forecast(db: Session, user_id: uuid.UUID, force: bool = False) -> dict:
     """
     Trains or applies the demand forecasting model for a user and returns
     purchase recommendations. Also persists predictions to the DB.
 
-    Returns a dict with:
-      - recommendations: list of per-product recommendation dicts
-      - total_products_analyzed: int
-      - data_weeks_available: int
-      - generated_at: datetime
+    Cachea el resultado por user_id durante 10 min. Pasá force=True para
+    invalidar y recalcular.
     """
+    import time as _time
+
+    cache_key = str(user_id)
+    if not force:
+        cached = _FORECAST_CACHE.get(cache_key)
+        if cached and (_time.time() - cached[0]) < _FORECAST_TTL_SECONDS:
+            return cached[1]
+
     weekly_df = _get_weekly_sales(db, user_id)
     generated_at = datetime.now(timezone.utc)
 
@@ -325,9 +347,11 @@ def run_forecast(db: Session, user_id: uuid.UUID) -> dict:
 
     recommendations.sort(key=lambda x: x["recommended_purchase"], reverse=True)
 
-    return {
+    payload = {
         "recommendations": recommendations,
         "total_products_analyzed": len(recommendations),
         "data_weeks_available": total_weeks,
         "generated_at": generated_at,
     }
+    _FORECAST_CACHE[cache_key] = (_time.time(), payload)
+    return payload

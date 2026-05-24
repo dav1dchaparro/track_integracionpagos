@@ -32,3 +32,10 @@ Thumbs.db
 *.local
 CloverIAMarketing/.idea/
 .claude/
+
+# Data sources (Excel / CSV) — regenerable con gen_kiosko_v2.py
+*.xlsx
+backend/ventas_*.csv
+backend/clientes.csv
+backend/compras_proveedor.csv
+backend/stock_inicial.csv

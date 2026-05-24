@@ -11,7 +11,7 @@ const typeStyles = {
 
 const OWNER_NOTIFS = [
   { id: 1, type: 'success', title: 'Meta de revenue alcanzada', desc: 'Superaste el objetivo mensual en un 12%', time: '5 min', unread: true },
-  { id: 2, type: 'warning', title: '650 clientes en riesgo de churn', desc: 'Acción recomendada: campaña win-back', time: '1 hora', unread: true },
+  { id: 2, type: 'warning', title: '650 clientes hace rato que no vuelven', desc: 'Mandales una promo para que se acuerden de vos', time: '1 hora', unread: true },
   { id: 3, type: 'info',    title: 'Reporte mensual disponible', desc: 'Dashboard Analytics — Marzo 2026', time: '3 horas', unread: false },
 ]
 
@@ -269,7 +269,7 @@ export default function Header({ darkMode, onToggleDark, onToggleSidebar }) {
             <div className="p-6 grid grid-cols-2 gap-3">
               {[
                 { label: 'Gráfico de barras',    icon: '📊', desc: 'Compara métricas' },
-                { label: 'KPI Rápido',           icon: '⚡', desc: 'Métrica clave' },
+                { label: 'Número clave',         icon: '⚡', desc: 'Un dato grande y claro' },
                 { label: 'Tabla de datos',       icon: '📋', desc: 'Vista tabular' },
                 { label: 'Mapa geográfico',      icon: '🗺️', desc: 'Distribución global' },
                 { label: 'Gauge / Velocímetro',  icon: '🎯', desc: 'Progreso hacia meta' },

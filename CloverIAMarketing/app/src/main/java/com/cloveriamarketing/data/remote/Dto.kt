@@ -176,3 +176,31 @@ data class CategoryDto(
     val name: String,
     @SerializedName("created_at") val createdAt: String
 )
+
+// ═══════════════════════════════════════════════════════════
+//  CHECKOUT ASSISTANT — Sugerencias en vivo desde el terminal
+// ═══════════════════════════════════════════════════════════
+
+/** Body que se envía al POST /clover/cart-suggestions */
+data class CartSuggestionRequest(
+    @SerializedName("product_ids") val productIds: List<String>,
+    val limit: Int = 3,
+    @SerializedName("lookback_days") val lookbackDays: Int = 90
+)
+
+/** Respuesta del POST /clover/cart-suggestions */
+data class CartSuggestionResponse(
+    val suggestions: List<CartSuggestionDto>,
+    @SerializedName("cart_size") val cartSize: Int,
+    @SerializedName("based_on_sales") val basedOnSales: Int
+)
+
+data class CartSuggestionDto(
+    @SerializedName("product_id") val productId: String,
+    @SerializedName("product_name") val productName: String,
+    val price: Double,
+    val confidence: Double,
+    val lift: Double,
+    @SerializedName("co_occurrences") val coOccurrences: Int,
+    val reason: String
+)

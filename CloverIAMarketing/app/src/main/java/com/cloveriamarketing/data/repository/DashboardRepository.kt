@@ -106,4 +106,26 @@ class DashboardRepository {
             Result.failure(Exception("Sin conexión: ${e.message}"))
         }
     }
+
+    /**
+     * Pide sugerencias de cross-sell para el carrito actual.
+     * Backend hace market basket analysis sobre las ventas históricas del comercio.
+     */
+    suspend fun getCartSuggestions(
+        productIds: List<String>,
+        limit: Int = 3
+    ): Result<CartSuggestionResponse> {
+        return try {
+            val response = api.getCartSuggestions(
+                CartSuggestionRequest(productIds = productIds, limit = limit)
+            )
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Error ${response.code()}: No se pudieron cargar sugerencias"))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("Sin conexión: ${e.message}"))
+        }
+    }
 }

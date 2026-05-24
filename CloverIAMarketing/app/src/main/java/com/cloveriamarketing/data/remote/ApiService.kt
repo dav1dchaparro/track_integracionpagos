@@ -138,4 +138,20 @@ interface ApiService {
     /** Alertas inteligentes: clientes en riesgo, productos lentos, metas */
     @GET("insights/alerts")
     suspend fun getAlerts(): Response<AlertsResponse>
+
+    // ═══════════════════════════════════════════════════════════
+    //  CHECKOUT ASSISTANT — exclusivo del terminal Clover
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * Sugerencias de cross-sell en vivo dado el carrito actual.
+     * Esta llamada solo tiene sentido desde el terminal Clover en el
+     * momento del checkout — el dashboard web no tiene carrito vivo.
+     *
+     * Backend: POST /clover/cart-suggestions
+     */
+    @POST("clover/cart-suggestions")
+    suspend fun getCartSuggestions(
+        @Body request: CartSuggestionRequest
+    ): Response<CartSuggestionResponse>
 }

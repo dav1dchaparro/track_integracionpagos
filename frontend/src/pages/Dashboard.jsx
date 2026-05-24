@@ -146,7 +146,7 @@ export default function Dashboard() {
   }
 
   const paymentData = Object.entries(payment_methods).map(([name, v]) => ({
-    name: name === 'card' ? 'Tarjeta' : name === 'qr' ? 'QR' : name,
+    name: name === 'card' ? 'Tarjeta' : name === 'qr' ? 'QR' : name === 'cash' ? 'Efectivo' : name,
     value: v.total,
     count: v.count,
   }))

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.cloveriamarketing.ui.screens.CheckoutAssistantScreen
 import com.cloveriamarketing.ui.screens.DashboardScreen
 import com.cloveriamarketing.ui.screens.LoginScreen
 
@@ -17,8 +18,9 @@ import com.cloveriamarketing.ui.screens.LoginScreen
  * en todos los lugares donde se usa — no hay errores en runtime.
  */
 sealed class Screen(val route: String) {
-    object Login     : Screen("login")       // Pantalla de ingreso
-    object Dashboard : Screen("dashboard")   // Panel principal
+    object Login             : Screen("login")              // Pantalla de ingreso
+    object Dashboard         : Screen("dashboard")          // Panel principal
+    object CheckoutAssistant : Screen("checkout-assistant") // Asistente de cross-sell en el terminal
 }
 
 /**
@@ -60,7 +62,17 @@ fun NavGraph(navController: NavHostController) {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Dashboard.route) { inclusive = true }
                     }
+                },
+                onOpenCheckoutAssistant = {
+                    navController.navigate(Screen.CheckoutAssistant.route)
                 }
+            )
+        }
+
+        // ── Pantalla Asistente de Checkout ────────────────────────
+        composable(route = Screen.CheckoutAssistant.route) {
+            CheckoutAssistantScreen(
+                onBack = { navController.popBackStack() }
             )
         }
     }
