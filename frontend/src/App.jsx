@@ -29,7 +29,7 @@ function AuthenticatedApp() {
   }
 
   return (
-    <div className={darkMode ? 'dark' : ''}>
+    <div className={darkMode ? 'dark' : 'light'}>
       <div className="flex h-screen overflow-hidden" style={{ background: 'var(--scifi-bg)' }}>
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
