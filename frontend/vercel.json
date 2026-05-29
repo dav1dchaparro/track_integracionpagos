@@ -1,18 +1,18 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/auth/:path*", "destination": "__API_URL__/auth/:path*" },
-    { "source": "/categories/:path*", "destination": "__API_URL__/categories/:path*" },
-    { "source": "/clover/:path*", "destination": "__API_URL__/clover/:path*" },
-    { "source": "/dashboard/:path*", "destination": "__API_URL__/dashboard/:path*" },
-    { "source": "/forecasting/:path*", "destination": "__API_URL__/forecasting/:path*" },
-    { "source": "/insights/:path*", "destination": "__API_URL__/insights/:path*" },
-    { "source": "/products/:path*", "destination": "__API_URL__/products/:path*" },
-    { "source": "/sales/:path*", "destination": "__API_URL__/sales/:path*" },
-    { "source": "/stream/:path*", "destination": "__API_URL__/stream/:path*" },
-    { "source": "/receipts/:path*", "destination": "__API_URL__/receipts/:path*" },
-    { "source": "/r/:path*", "destination": "__API_URL__/r/:path*" },
-    { "source": "/health", "destination": "__API_URL__/health" },
+    { "source": "/auth/:path*", "destination": "https://atlas-nexus-api.onrender.com/auth/:path*" },
+    { "source": "/categories/:path*", "destination": "https://atlas-nexus-api.onrender.com/categories/:path*" },
+    { "source": "/clover/:path*", "destination": "https://atlas-nexus-api.onrender.com/clover/:path*" },
+    { "source": "/dashboard/:path*", "destination": "https://atlas-nexus-api.onrender.com/dashboard/:path*" },
+    { "source": "/forecasting/:path*", "destination": "https://atlas-nexus-api.onrender.com/forecasting/:path*" },
+    { "source": "/insights/:path*", "destination": "https://atlas-nexus-api.onrender.com/insights/:path*" },
+    { "source": "/products/:path*", "destination": "https://atlas-nexus-api.onrender.com/products/:path*" },
+    { "source": "/sales/:path*", "destination": "https://atlas-nexus-api.onrender.com/sales/:path*" },
+    { "source": "/stream/:path*", "destination": "https://atlas-nexus-api.onrender.com/stream/:path*" },
+    { "source": "/receipts/:path*", "destination": "https://atlas-nexus-api.onrender.com/receipts/:path*" },
+    { "source": "/r/:path*", "destination": "https://atlas-nexus-api.onrender.com/r/:path*" },
+    { "source": "/health", "destination": "https://atlas-nexus-api.onrender.com/health" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
