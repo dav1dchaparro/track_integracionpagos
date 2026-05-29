@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: atlas-nexus-api
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    # Override the Dockerfile CMD (which uses --reload, dev-only) and bind to
+    # Render's injected $PORT instead of the hardcoded 8000.
+    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      # Set these in the Render dashboard (Environment tab):
+      - key: DATABASE_URL      # Neon connection string (postgresql+psycopg2://...)
+        sync: false
+      - key: GROQ_API_KEY      # from console.groq.com — enables live AI
+        sync: false
+      - key: JWT_SECRET        # auto-generated strong secret
+        generateValue: true
