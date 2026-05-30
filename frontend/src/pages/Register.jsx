@@ -1,46 +1,99 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, AlertCircle, Github } from 'lucide-react'
+import {
+  Eye, EyeOff, Mail, Lock, User, Building2, Phone,
+  AlertCircle, CheckCircle, ArrowLeft,
+} from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
-// ─── Google "G" icon (multi-color) ──────────────────────────────────────────
-function GoogleIcon({ className }) {
+// ─── Password strength ────────────────────────────────────────────────────────
+function getStrength(pwd) {
+  if (!pwd) return null
+  if (pwd.length < 6) return { level: 1, label: 'Muy débil',  color: '#ef4444', bars: 1 }
+  const hasUpper   = /[A-Z]/.test(pwd)
+  const hasNum     = /[0-9]/.test(pwd)
+  const hasSpecial = /[^A-Za-z0-9]/.test(pwd)
+  const extras = [hasUpper, hasNum, hasSpecial].filter(Boolean).length
+  if (pwd.length >= 10 && extras >= 2) return { level: 4, label: 'Muy fuerte', color: '#00d2b4', bars: 4 }
+  if (pwd.length >= 8  && extras >= 1) return { level: 3, label: 'Fuerte',     color: '#00d2b4', bars: 3 }
+  if (pwd.length >= 6  && extras >= 1) return { level: 2, label: 'Regular',    color: '#f59e0b', bars: 2 }
+  return { level: 1, label: 'Débil', color: '#f97316', bars: 1 }
+}
+
+function StrengthBar({ password }) {
+  const s = getStrength(password)
+  if (!s) return null
   return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/>
-      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.99.66-2.26 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/>
-      <path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/>
-      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/>
-    </svg>
+    <div className="mt-2">
+      <div className="flex gap-1 mb-1">
+        {[1, 2, 3, 4].map(i => (
+          <div
+            key={i}
+            className="h-1 flex-1 rounded-full transition-all duration-300"
+            style={{ backgroundColor: i <= s.bars ? s.color : 'rgba(255,255,255,0.08)' }}
+          />
+        ))}
+      </div>
+      <p className="text-[11px] font-semibold" style={{ color: s.color }}>{s.label}</p>
+    </div>
   )
 }
 
-const inputClass =
-  "w-full px-4 py-3 rounded-lg text-white text-sm placeholder-white/30 focus:outline-none transition-all"
-const inputStyle = { background: '#262626', border: '1px solid #3a3a3a' }
+function Req({ ok, label }) {
+  return (
+    <li className={`flex items-center gap-1.5 text-[11px] transition-colors ${ok ? 'text-emerald-400' : 'text-white/25'}`}>
+      <CheckCircle className={`w-3 h-3 flex-shrink-0 ${ok ? 'text-emerald-400' : 'text-white/15'}`} />
+      {label}
+    </li>
+  )
+}
+
+const inputClass = "w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm placeholder-white/20 focus:outline-none transition-all"
+const inputStyle = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
 const focusHandlers = {
-  onFocus: e => { e.target.style.borderColor = '#2d7a5f' },
-  onBlur:  e => { e.target.style.borderColor = '#3a3a3a' },
+  onFocus: e => { e.target.style.borderColor = 'rgba(0,210,180,0.4)'; e.target.style.background = 'rgba(0,210,180,0.05)' },
+  onBlur: e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.04)' },
+}
+
+function Field({ label, icon: Icon, required, children }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-white/60 mb-1.5">
+        {label} {required && <span className="text-red-400">*</span>}
+      </label>
+      <div className="relative">
+        <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25 pointer-events-none" />
+        {children}
+      </div>
+    </div>
+  )
 }
 
 export default function Register() {
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '' })
-  const [showPass, setShowPass] = useState(false)
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState('')
+  const [form, setForm] = useState({
+    name: '', email: '', password: '', confirm: '', department: '', phone: '',
+  })
+  const [showPass, setShowPass]       = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [loading, setLoading]         = useState(false)
+  const [error, setError]             = useState('')
 
   const { register } = useAuth()
   const navigate     = useNavigate()
 
   const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); setError('') }
 
+  const pwdMatch = form.password && form.confirm && form.password === form.confirm
+  const pwdOk6   = form.password.length >= 6
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (form.password.length < 8) return setError('La contraseña debe tener al menos 8 caracteres')
+    if (!pwdOk6)   return setError('La contraseña debe tener al menos 6 caracteres')
+    if (!pwdMatch) return setError('Las contraseñas no coinciden')
 
     setLoading(true)
     const result = await register({
-      storeName: `${form.firstName} ${form.lastName}`.trim() || form.email,
+      storeName: form.name,
       email: form.email,
       password: form.password,
     })
@@ -51,134 +104,164 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 sm:p-8" style={{ background: '#0d0d0d' }}>
-      <div
-        className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 rounded-2xl overflow-hidden"
-        style={{ minHeight: '640px', boxShadow: '0 32px 64px rgba(0,0,0,0.5)' }}
-      >
-        {/* ── Left: empty green gradient panel ── */}
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center py-10 px-4">
+      {/* ── Background ── */}
+      <div className="absolute inset-0 bg-[#050a0e]">
         <div
-          className="hidden md:block relative"
-          style={{ background: 'linear-gradient(135deg, #1a5a4a 0%, #2d7a5f 100%)' }}
+          className="absolute w-[700px] h-[700px] rounded-full"
+          style={{
+            top: '-10%', right: '-10%',
+            background: 'radial-gradient(circle, rgba(0,210,180,0.35) 0%, rgba(0,180,160,0.15) 40%, transparent 70%)',
+            filter: 'blur(80px)',
+            animation: 'blobDrift 12s ease-in-out infinite alternate',
+          }}
+        />
+        <div
+          className="absolute w-[600px] h-[600px] rounded-full"
+          style={{
+            bottom: '-15%', left: '-5%',
+            background: 'radial-gradient(circle, rgba(0,220,190,0.3) 0%, rgba(0,160,140,0.1) 40%, transparent 70%)',
+            filter: 'blur(90px)',
+            animation: 'blobDrift 15s ease-in-out infinite alternate-reverse',
+          }}
+        />
+      </div>
+
+      {/* ── Content ── */}
+      <div className="relative z-10 w-full max-w-md">
+        <Link
+          to="/login"
+          className="inline-flex items-center gap-2 text-sm text-[#00d2b4]/60 hover:text-[#00d2b4] transition-colors mb-6"
         >
-          {/* subtle depth glow */}
-          <div
-            className="absolute inset-0"
-            style={{ background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.08), transparent 60%)' }}
-          />
-        </div>
+          <ArrowLeft className="w-4 h-4" />
+          Volver al inicio de sesión
+        </Link>
 
-        {/* ── Right: sign-up form ── */}
-        <div className="flex flex-col justify-center px-8 sm:px-12 py-12" style={{ background: '#1a1a1a' }}>
-          <div className="w-full max-w-sm mx-auto">
-            {/* Header */}
-            <h1 className="text-2xl font-bold text-white text-center">Sign Up Account</h1>
-            <p className="text-sm text-white/50 text-center mt-1.5 mb-7">
-              Enter your personal data to create your account
-            </p>
-
-            {/* Social auth */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <button
-                type="button"
-                className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-white transition-colors hover:bg-white/5"
-                style={{ background: '#262626', border: '1px solid #3a3a3a' }}
+        <div
+          className="w-full rounded-2xl overflow-hidden"
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            backdropFilter: 'blur(24px)',
+            boxShadow: '0 32px 64px rgba(0,0,0,0.4)',
+          }}
+        >
+          {/* Header */}
+          <div className="px-8 pt-8 pb-6" style={{ background: 'linear-gradient(135deg, rgba(0,210,180,0.08), rgba(0,160,140,0.04))' }}>
+            <div className="flex items-center gap-3 mb-5">
+              <div
+                className="w-10 h-10 flex items-center justify-center"
+                style={{ filter: 'drop-shadow(0 0 8px rgba(0,255,80,0.6))' }}
               >
-                <GoogleIcon className="w-4 h-4" />
-                Google
-              </button>
-              <button
-                type="button"
-                className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-white transition-colors hover:bg-white/5"
-                style={{ background: '#262626', border: '1px solid #3a3a3a' }}
-              >
-                <Github className="w-4 h-4" />
-                Github
-              </button>
-            </div>
-
-            {/* Divider */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex-1 h-px bg-white/10" />
-              <span className="text-xs text-white/30">Or</span>
-              <div className="flex-1 h-px bg-white/10" />
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-white/60 mb-1.5">First Name</label>
-                  <input
-                    type="text" value={form.firstName} onChange={e => set('firstName', e.target.value)}
-                    placeholder="eg. John" required className={inputClass} style={inputStyle} {...focusHandlers}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-white/60 mb-1.5">Last Name</label>
-                  <input
-                    type="text" value={form.lastName} onChange={e => set('lastName', e.target.value)}
-                    placeholder="eg. Francisco" required className={inputClass} style={inputStyle} {...focusHandlers}
-                  />
-                </div>
+                <img src="/logo.png" alt="Atlas Nexus" className="w-8 h-8 object-contain" />
               </div>
-
               <div>
-                <label className="block text-xs font-medium text-white/60 mb-1.5">Email</label>
-                <input
-                  type="email" value={form.email} onChange={e => set('email', e.target.value)}
-                  placeholder="eg. johnfrans@gmail.com" required className={inputClass} style={inputStyle} {...focusHandlers}
-                />
+                <p className="font-bold text-white text-sm tracking-wide leading-none">ATLAS NEXUS</p>
+                <p className="text-[10px] mt-0.5 text-[#00d2b4]/50">Registro de nueva cuenta</p>
               </div>
-
-              <div>
-                <label className="block text-xs font-medium text-white/60 mb-1.5">Password</label>
-                <div className="relative">
-                  <input
-                    type={showPass ? 'text' : 'password'} value={form.password}
-                    onChange={e => set('password', e.target.value)} placeholder="Enter your password" required
-                    className={`${inputClass} pr-11`} style={inputStyle} {...focusHandlers}
-                  />
-                  <button
-                    type="button" onClick={() => setShowPass(!showPass)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
-                  >
-                    {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                <p className="text-xs text-white/40 mt-2">Must be at least 8 characters.</p>
-              </div>
-
-              {error && (
-                <div
-                  className="flex items-center gap-2.5 px-3.5 py-3 rounded-lg"
-                  style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}
-                >
-                  <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-                  <p className="text-sm text-red-300">{error}</p>
-                </div>
-              )}
-
-              <button
-                type="submit" disabled={loading}
-                className="w-full py-3 rounded-lg font-semibold text-sm transition-all duration-200 disabled:opacity-70 flex items-center justify-center gap-2.5 mt-2 bg-white text-black hover:bg-white/90"
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                    Creating account...
-                  </>
-                ) : 'Sign Up'}
-              </button>
-            </form>
-
-            <p className="text-center text-sm text-white/40 mt-6">
-              Already have an account?{' '}
-              <Link to="/login" className="font-semibold text-white hover:underline">Log in</Link>
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-1">Registra tu negocio</h1>
+            <p className="text-sm text-white/40">
+              Crea tu cuenta y conecta tu comercio a <strong className="text-[#00d2b4]">Atlas Nexus</strong> para empezar a crecer con datos inteligentes.
             </p>
           </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="px-8 py-6 space-y-4">
+            <Field label="Nombre del negocio" icon={Building2} required>
+              <input type="text" value={form.name} onChange={e => set('name', e.target.value)}
+                placeholder="Ej: Café Don Pedro" required className={inputClass} style={inputStyle} {...focusHandlers} />
+            </Field>
+
+            <Field label="Email" icon={Mail} required>
+              <input type="email" value={form.email} onChange={e => set('email', e.target.value)}
+                placeholder="tu@empresa.com" required className={inputClass} style={inputStyle} {...focusHandlers} />
+            </Field>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Departamento" icon={Building2}>
+                <input type="text" value={form.department} onChange={e => set('department', e.target.value)}
+                  placeholder="Ventas" className={inputClass} style={inputStyle} {...focusHandlers} />
+              </Field>
+              <Field label="Teléfono" icon={Phone}>
+                <input type="text" value={form.phone} onChange={e => set('phone', e.target.value)}
+                  placeholder="+34 600..." className={inputClass} style={inputStyle} {...focusHandlers} />
+              </Field>
+            </div>
+
+            <Field label="Contraseña" icon={Lock} required>
+              <input type={showPass ? 'text' : 'password'} value={form.password}
+                onChange={e => set('password', e.target.value)} placeholder="Mínimo 6 caracteres" required
+                className={`${inputClass} pr-12`} style={inputStyle} {...focusHandlers} />
+              <button type="button" onClick={() => setShowPass(!showPass)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors">
+                {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+              {form.password && <StrengthBar password={form.password} />}
+            </Field>
+
+            <Field label="Confirmar contraseña" icon={Lock} required>
+              <input type={showConfirm ? 'text' : 'password'} value={form.confirm}
+                onChange={e => set('confirm', e.target.value)} placeholder="Repite tu contraseña" required
+                className={`${inputClass} pr-12`}
+                style={{
+                  ...inputStyle,
+                  ...(form.confirm && !pwdMatch
+                    ? { borderColor: 'rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.05)' }
+                    : form.confirm && pwdMatch
+                    ? { borderColor: 'rgba(0,210,180,0.3)', background: 'rgba(0,210,180,0.05)' }
+                    : {}),
+                }}
+                {...focusHandlers}
+              />
+              <button type="button" onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors">
+                {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </Field>
+
+            <ul className="space-y-1.5 px-1">
+              <Req ok={pwdOk6}  label="Mínimo 6 caracteres" />
+              <Req ok={pwdMatch && !!form.confirm} label="Las contraseñas coinciden" />
+            </ul>
+
+            {error && (
+              <div className="flex items-center gap-2.5 px-3.5 py-3 rounded-xl"
+                style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}
+              >
+                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                <p className="text-sm text-red-300">{error}</p>
+              </div>
+            )}
+
+            <button
+              type="submit" disabled={loading}
+              className="w-full py-3.5 rounded-xl font-bold text-white text-sm transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-2.5 mt-2 hover:brightness-110"
+              style={{ background: 'linear-gradient(135deg, #00d2b4, #00a896)', boxShadow: '0 4px 20px rgba(0,210,180,0.3)' }}
+            >
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Creando cuenta...
+                </>
+              ) : 'Crear mi cuenta →'}
+            </button>
+
+            <p className="text-center text-xs text-white/30 pt-1">
+              ¿Ya tienes cuenta?{' '}
+              <Link to="/login" className="font-semibold text-[#00d2b4] hover:underline">Inicia sesión</Link>
+            </p>
+          </form>
         </div>
       </div>
+
+      <style>{`
+        @keyframes blobDrift {
+          0%   { transform: translate(0, 0) scale(1); }
+          50%  { transform: translate(-30px, 20px) scale(1.08); }
+          100% { transform: translate(15px, -15px) scale(0.95); }
+        }
+      `}</style>
     </div>
   )
 }
